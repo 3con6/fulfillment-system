@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/dropzone.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Design type/</span> Add design type</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Add design type</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="name">Mame *</label>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Design type name"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="description">Description *</label>
+                                <input type="text" class="form-control" name="description" id="description" placeholder="Design type description"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="price">Price *</label>
+                                <input type="number" class="form-control" name="price" id="price" value="0"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" class="dz-hidden-input" tabindex="-1"
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;">
+    <!--/ Hoverable Table rows -->
+</div>
+{% endblock %}

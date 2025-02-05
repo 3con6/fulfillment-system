@@ -1,0 +1,1618 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.min.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.min.css') }}" />
+
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/dropzone/dropzone.min.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/typeahead-js/typeahead.min.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/select2/select2.min.css') }}" />
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Orders</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="card-header header-elements">
+                <div>
+                    <h5 class="card-title mb-0">Table Orders</h5>
+                </div>
+                <div class="col-md-12 col-12">
+                    <div class="card text-center h-100">
+                        <div class="card-header">
+                            <ul class="nav nav-pills card-header-pills" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-pills-browser" aria-controls="navs-pills-browser"
+                                        aria-selected="true" tabindex="-1">Button</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-pills-os" aria-controls="navs-pills-os"
+                                        aria-selected="false">Filter</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-show-column" aria-controls="navs-show-column"
+                                        aria-selected="false">Show column</button>
+                                </li>
+                                {% if j2_group_perm('dev,admin,fulfillment,leader fulfillment,factory,mod', user_data) %}
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-pills-total" aria-controls="navs-pills-total"
+                                        aria-selected="false">Total</button>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="tab-content pt-0">
+                            <div class="tab-pane fade active show" id="navs-pills-browser" role="tabpanel">
+                                <div class="button-groups ms-auto card-header-elements ">
+                                    {% if j2_group_perm('dev,admin,leader designer,mod', user_data) %}
+                                    <button class="btn btn-sm btn-outline-warning" id="assignDes" data-bs-toggle="modal"
+                                        data-bs-target="#assignDesForm">
+                                        <i class="bx bx-bone me-1"></i>Assign Design
+                                    </button>
+                                    <div class="modal fade" id="assignDesForm" tabindex="-1" style="display: none;"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel1">Assign for</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col mb-3">
+                                                            <input id="assignDesInput" class="form-control typeahead" data-designer='{{ data.designer.options|tojson|replace("\n", "")|replace(" ", "") }}'
+                                                                type="text" autocomplete="off"
+                                                                placeholder="Enter designer" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-primary" id="assignBtn">Save
+                                                        changes</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if j2_not_group_perm('designer', user_data) %}
+                                    {% if j2_group_perm('dev,admin', user_data) %}
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                        data-bs-target="#printBarcodeModal">
+                                        <i class="bx bx-printer me-1"></i>Print barcode
+                                    </button>
+
+
+                                    <button class="btn btn-sm btn-outline-danger" id="archive"><i
+                                            class="bx bx-trash me-1"></i>Archive</button>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if j2_group_perm('dev,admin,fulfillment', user_data) %}
+                                    <button class="btn btn-sm btn-outline-facebook" data-bs-toggle="modal"
+                                        data-bs-target="#importTrackingModal" id="fwShipping"><i
+                                            class="bx bxs-plane-take-off"></i>Import tracking</button>
+
+                                    <div class="modal fade" id="importTrackingModal" tabindex="-1"
+                                        style="display: none;" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel2"></h5>
+                                                    <small><a href="/download_tracking_csv" role="button">template
+                                                            csv</a></small> &nbsp;|&nbsp;
+                                                    <small><a href="/download_tracking_xlsx" role="button">template
+                                                            xlsx</a></small>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <!-- form import tracking -->
+                                                        <form method="POST" id="importTrackingForm"
+                                                            enctype="multipart/form-data">
+                                                            <div class="col mb-3">
+                                                                <input class="form-control-sm" type="file" name="file"
+                                                                    id="file" />
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <button type="button" class="btn btn-primary"
+                                                                    id="importTracking">Import</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if j2_group_perm('dev,admin,fulfillment,leader fulfillment,factory,other,other
+                                    team,seller,leader seller', user_data)%}
+
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+                                        data-bs-target="#bulkEdit" id="editFactory"><i class="bx bxs-edit"></i>Bulk
+                                        Edit</button>
+
+                                    <div class="modal fade" id="bulkEdit" tabindex="-1" style="display: none;"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <!-- form bulk edit -->
+                                                        <form action="" method="POST" id="bulkEditForm">
+                                                            <div class="nav-align-top mb-4">
+                                                                <ul class="nav nav-tabs" role="tablist">
+                                                                    <li class="nav-item" role="presentation">
+                                                                        <button type="button"
+                                                                            class="nav-link nav-link-2 active"
+                                                                            role="tab" data-bs-toggle="tab"
+                                                                            data-bs-target="#navs-top-xuong"
+                                                                            aria-controls="navs-top-xuong"
+                                                                            aria-selected="true">Xuong</button>
+                                                                    </li>
+                                                                    <li class="nav-item" role="presentation">
+                                                                        <button type="button"
+                                                                            class="nav-link nav-link-2" role="tab"
+                                                                            data-bs-toggle="tab"
+                                                                            data-bs-target="#navs-top-status"
+                                                                            aria-controls="navs-top-status"
+                                                                            aria-selected="false"
+                                                                            tabindex="-1">Status</button>
+                                                                    </li>
+                                                                    <li class="nav-item" role="presentation">
+                                                                        <button type="button"
+                                                                            class="nav-link nav-link-2" role="tab"
+                                                                            data-bs-toggle="tab"
+                                                                            data-bs-target="#navs-top-type"
+                                                                            aria-controls="navs-top-type"
+                                                                            aria-selected="false"
+                                                                            tabindex="-1">Type</button>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="tab-content">
+                                                                    <div class="tab-pane fade active show"
+                                                                        id="navs-top-xuong" role="tabpanel">
+                                                                        <label class="form-label"
+                                                                            for="bulk_factory">Xưởng</label>
+                                                                        <select
+                                                                            class="form-select form-select form-select-color factory-select mb-3"
+                                                                            id="bulk_factory">
+                                                                            {% for factory in data.factories.options %}
+                                                                            <option class="form-control custom-option"
+                                                                                value="{{factory}}">{{factory}}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="tab-pane fade" id="navs-top-status"
+                                                                        role="tabpanel">
+                                                                        <label class="form-label"
+                                                                            for="bulk_status">Status</label>
+                                                                        <select
+                                                                            class="form-select form-select form-select-color status-select mb-3"
+                                                                            id="bulk_status">
+                                                                            <option class="form-control custom-option"
+                                                                                value="null"></option>
+                                                                            {% for status in data.status.options %}
+                                                                            <option class="form-control custom-option"
+                                                                                value="{{status}}">{{status}}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="tab-pane fade" id="navs-top-type"
+                                                                        role="tabpanel">
+                                                                        <label class="form-label"
+                                                                            for="bulk_type">Type</label>
+                                                                        <select
+                                                                            class="form-select form-select form-select-color type-select mb-3"
+                                                                            id="bulk_type">
+                                                                            <option class="form-control custom-option"
+                                                                                value="null"></option>
+                                                                            {% for type in data.type.options %}
+                                                                            <option class="form-control custom-option"
+                                                                                value="{{type}}">{{type}}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <button type="button" class="btn btn-primary"
+                                                                    id="submitBulkEdit">Submit</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
+                                        data-bs-target="#replaceModal">
+                                        <i class="bx bxs-dog"></i>Replace Items</button>
+
+                                    <button class="btn btn-sm btn-outline-dark" id="kiotviet"><i
+                                            class="bx bxs-file-export"></i>KiotViet</button>
+                                    <button class="btn btn-sm btn-outline-dark" id="export_xuong"><i
+                                            class="bx bxs-file-export"></i>Xuong</button>
+                                    <button class="btn btn-sm btn-outline-dark" id="export_ship"><i
+                                            class="bx bxs-file-export"></i>Ship</button>
+                                    <button class="btn btn-sm btn-outline-dark" id="sync_tracking"><i
+                                            class="bx bx-sync"></i>Sync Tracking</button>
+                                    <button class="btn btn-sm btn-outline-dark" id="export_ornc"><i
+                                        class="bx bxs-file-export"></i>Export ORNC</button>
+                                    <button class="btn btn-sm btn-outline-dark" id="export_flast_ship"><i
+                                        class="bx bxs-file-export"></i>Flash Ship</button>
+                                   
+                                    
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="tab-pane fade container" id="navs-pills-os" role="tabpanel">
+                                <form id="filter-order" enctype="multipart/form-data">
+                                    <div class="row justify-content-md-center">
+                                        <div class="col-md-2">
+                                            <label style="margin-bottom: 6px; margin-top: 2px;"
+                                                for="date-range-picker-2">Date Range Picker</label>
+                                            <span>
+                                                <input type="text" class="form-control-sm" name="date-range"
+                                                    id="date-range-picker-2" />
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="filter_team">Team</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="teams" id="filter_team" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for team in data.teams.options %}
+                                                    {% if team in data.teams.selected %}
+                                                    <option value="{{team}}" selected>{{team}}</option>
+                                                    {% else %}
+                                                    <option value="{{team}}">{{team}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="filter_status">Status</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="order_status" id="filter_status" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for status in data.status.options %}
+                                                    {% if status in data.status.selected %}
+                                                    <option value="{{status}}" selected>{{status}}</option>
+                                                    {% else %}
+                                                    <option value="{{status}}">{{status}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="filter_designer">Designer</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="designer" id="filter_designer" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for designer in data.designer.options %}
+                                                    {% if designer in data.designer.selected %}
+                                                    <option value="{{designer}}" selected>{{designer}}</option>
+                                                    {% else %}
+                                                    <option value="{{designer}}">{{designer}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_tracking_synced">Tracking synced</label>
+                                            <div>
+                                                <select class="form-control"
+                                                    name="filter_tracking_synced" id="filter_tracking_synced">
+                                                    <option value=""></option>
+                                                    <option value="False" {%if data.tracking_synced == 'False'%} selected {%endif%}>False</option>
+                                                    <option value="True" {%if data.tracking_synced == 'True'%} selected {%endif%}>True</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!-- search input -->
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="search_input">Order id</label>
+                                            <div>
+                                                {% if data.search %}
+                                                <input type="text" class="form-control" name="filter_order_id"
+                                                    value="{{data.search}}" id="filter_order_id" />
+                                                {% else %}
+                                                <input type="text" class="form-control" name="filter_order_id"
+                                                    id="filter_order_id" />
+                                                {% endif %}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-md-center">
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_type">Type</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="product_type" id="filter_type" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for type in data.product_types.options %}
+                                                    {% if type in data.product_types.selected %}
+                                                    <option value="{{type}}" selected>{{type}}</option>
+                                                    {% else %}
+                                                    <option value="{{type}}">{{type}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_shop">Shop</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="shop" id="filter_shop" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for shop in data.shops.options %}
+                                                    {% if shop in data.shops.selected %}
+                                                    <option value="{{shop}}" selected>{{shop}}</option>
+                                                    {% else %}
+                                                    <option value="{{shop}}">{{shop}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_seller">Seller</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="seller" id="filter_seller" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for seller in data.seller.options %}
+                                                    {% if seller in data.seller.selected %}
+                                                    <option value="{{seller}}" selected>{{seller}}</option>
+                                                    {% else %}
+                                                    <option value="{{seller}}">{{seller}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_factory">Xưởng</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="factories" id="filter_factory" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for factory in data.factories.options %}
+                                                    {% if factory in data.factories.selected %}
+                                                    <option value="{{factory}}" selected>{{factory}}</option>
+                                                    {% else %}
+                                                    <option value="{{factory}}">{{factory}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        {% if data.is_ff_ngoai %}
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_ff_provider">Fulfill status</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control-sm chosen-select"
+                                                    name="filter_ff_provider" id="filter_ff_provider"
+                                                    multiple="multiple" style="width: 100%">
+                                                    <option value="">None</option>
+                                                    <option value="Fulfilled">Fulfilled</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="col-md-2 mb-2">
+                                            <div>
+                                                <label class="form-label" for="filter_shipping_day">Shipping Day</label>
+                                                {% if data.shipping_date_from %}
+                                                <input type="date" class="form-control" name="shipping_day_from"
+                                                    value="{{data.shipping_day}}" id="filter_shipping_day" />
+                                                {% else %}
+                                                <input type="date" class="form-control" name="shipping_day_from"
+                                                    id="filter_shipping_day" />
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label" for="filter_have_tracking">Have Tracking</label>
+                                            <div>
+                                                <select class="form-control"
+                                                    name="filter_have_tracking" id="filter_have_tracking">
+                                                    <option value=""></option>
+                                                    <option value="False" {%if data.have_tracking == 'False'%} selected {%endif%}>False</option>
+                                                    <option value="True" {%if data.have_tracking == 'True'%} selected {%endif%}>True</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-md-center">
+                                        <div class="col-md-2 mb-2">
+                                            <button type="submit" class="btn btn-outline-primary"><i
+                                                    class="tf-icons bx bx-search-alt-2"></i>Search</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="navs-show-column" role="tabpanel">
+                                <div class="column-filters" data-user="{{data.user.user_id}}">
+                                    {% for column in range(1, 38) %}
+                                    <label><small>
+                                            {% if column in data.table_column %}
+                                            <input type="checkbox" class="column-toggle" data-column="{{ column }}"
+                                                checked>
+                                            {% else %}
+                                            <input type="checkbox" class="column-toggle" data-column="{{ column }}">
+                                            {% endif %}
+                                            {% if column == 1 %} Team
+                                            {% elif column == 2 %} Account
+                                            {% elif column == 3 %} Order Date
+                                            {% elif column == 4 %} Order ID
+                                            {% elif column == 5 %} Seller
+                                            {% elif column == 6 %} SKU
+                                            {% elif column == 7 %} Product Type
+                                            {% elif column == 8 %} Design Type
+                                            {% elif column == 9 %} Design price
+                                            {% elif column == 10 %} Design note
+                                            {% elif column == 11 %} Size
+                                            {% elif column == 12 %} Color
+                                            {% elif column == 13 %} Material
+                                            {% elif column == 14 %} No Color Kit
+                                            {% elif column == 15 %} No Holder
+                                            {% elif column == 16 %} Other Options
+                                            {% elif column == 17 %} Personalized
+                                            {% elif column == 18 %} Qty
+                                            {% elif column == 19 %} Designer
+                                            {% elif column == 20 %} Link des
+                                            {% elif column == 21 %} Note
+                                            {% elif column == 22 %} Xưởng
+                                            {% elif column == 23 %} Status
+                                            {% elif column == 24 %} {% if data.is_ff_ngoai %} Provider {% else %} Cost
+                                            {% endif %}
+                                            {% elif column == 25 %} {% if data.is_ff_ngoai %} FF ngoai date {% else %}
+                                            Shipping day {% endif %}
+                                            {% elif column == 26 %} Full Name
+                                            {% elif column == 27 %} Address
+                                            {% elif column == 28 %} Tracking
+                                            {% elif column == 29 %} Carrier
+                                            {% elif column == 30 %} Length
+                                            {% elif column == 31 %} Width
+                                            {% elif column == 32 %} Height
+                                            {% elif column == 33 %} Weight
+                                            {% elif column == 34 %} {% if data.is_ff_ngoai %} FF ngoai status {% else %}
+                                            Dispatch day {% endif %}
+                                            {% elif column == 35 %} Design error
+                                            {% elif column == 36 %} Ship unit
+                                            {% elif column == 37 %} Ship cost
+                                            {% endif %}
+                                        </small></label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if j2_group_perm('dev,admin,fulfillment,leader fulfillment,factory,mod', user_data) %}
+                            <div class="tab-pane fade" id="navs-pills-total" role="tabpanel">
+                                <div class="card-widget-separator-wrapper">
+                                    <div class="card-body card-widget-separator">
+                                        <div class="row gy-4 gy-sm-1">
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
+                                                    <div style="color: #ecc3fc;">
+                                                        <h6 class="mb-2" id="total_ready"></h6>
+                                                        <p class="mb-0">Ready</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block me-4">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
+                                                    <div style="color: #820c6c;">
+                                                        <h6 class="mb-2" id="total_ready_7"></h6>
+                                                        <p class="mb-0">Stale</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block me-4">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-3 pb-sm-0">
+                                                    <div style="color: #d49528;">
+                                                        <h6 class="mb-2" id="total_confirming"></h6>
+                                                        <p class="mb-0">Confirming</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #000000;">
+                                                        <h6 class="mb-2" id="total_pending"></h6>
+                                                        <p class="mb-0">Pending</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #f4ae22;">
+                                                        <h6 class="mb-2" id="total_doing"></h6>
+                                                        <p class="mb-0">Doing</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #b3d0ff;">
+                                                        <h6 class="mb-2" id="total_in"></h6>
+                                                        <p class="mb-0">In</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #535522;">
+                                                        <h6 class="mb-2" id="total_out"></h6>
+                                                        <p class="mb-0">Out</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #135d02;">
+                                                        <h6 class="mb-2" id="total_half_done"></h6>
+                                                        <p class="mb-0">Half done</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #95c3c7;">
+                                                        <h6 class="mb-2" id="total_designing"></h6>
+                                                        <p class="mb-0">Designing</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #930e0e;">
+                                                        <h6 class="mb-2" id="total_sai_des"></h6>
+                                                        <p class="mb-0">Sai Design</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #ffa6e0;">
+                                                        <h6 class="mb-2" id="total_design_uploaded"></h6>
+                                                        <p class="mb-0">Design uploaded</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-2">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
+                                                    <div style="color: #959595;">
+                                                        <h6 class="mb-2" id="total_none"></h6>
+                                                        <p class="mb-0">None</p>
+                                                    </div>
+                                                </div>
+                                                <hr class="d-sm-block">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 text-center loading_spinner">
+                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div class="card-datatable text-nowrap">
+                <div class="table-responsive text-nowrap render-results">
+                    <table class="table table-sm table-striped" id="table_products">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="check-all"></th>
+                                <th>Team</th>
+                                <th>Account</th>
+                                <th>Order Date</th>
+                                <th>Order ID</th>
+                                <th>Seller</th>
+                                <th>SKU</th>
+                                <th>Product Type</th>
+                                <th>Design Type</th>
+                                <th>Design price</th>
+                                <th>Design note</th>
+                                <th>Size/Style</th>
+                                <th>Color</th>
+                                <th>Material</th>
+                                <th>No Color Kit</th>
+                                <th>No Holder</th>
+                                <th>Other Options</th>
+                                <th>Personalized</th>
+                                <th>Qty</th>
+                                <th>Designer</th>
+                                <th>Link des</th>
+                                <th>Note</th>
+                                <th>Xưởng</th>
+                                <th>Fulfill Status</th>
+                                <th>{% if data.is_ff_ngoai %} Provider {% else %} Cost {% endif %}</th>
+                                <th>{% if data.is_ff_ngoai %} FF ngoai date {% else %} Shipping day {% endif %}</th>
+                                <th>Full Name</th>
+                                <th>Address</th>
+                                <th>Tracking No</th>
+                                <th>Carrier</th>
+                                <th>Length</th>
+                                <th>Width</th>
+                                <th>Height</th>
+                                <th>Weight</th>
+                                <th>{% if data.is_ff_ngoai %} FF ngoai status {% else %} Dispatch day {% endif %}</th>
+                                <th>Design error</th>
+                                <th>Ship unit</th>
+                                <th>Ship cost</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            {% for order in data.orders %}
+                            <tr class="order-row" data-status="{{order.fulfillment_status}}"
+                                data-order-id="{{ order.external_id }}" data-product-id="{{order.product_id}}"
+                                data-lineitem-id="{{order.line_item_id}}">
+                                <td><input class="dt-body-center" data-order-id="{{ order.external_id }}"
+                                        data-product-id="{{order.product_id}}" data-item-quantity="{{order.quantity}}"
+                                        type="checkbox" data-lineitem-id="{{order.line_item_id}}"
+                                        data-seller-id="{{order.seller}}" data-customer="{{order.name}}"></td>
+                                <td><small>{{order.team}}</small></td>
+                                <td><small>{{order.sales_account_id}}</small></td>
+                                <td><small>{{order.create_at}}</small></td>
+                                <td>
+                                    <small style="cursor: pointer;" onclick="show_thumbnail('{{order.thumbnail}}')">
+                                        {% if 'ship nhanh' not in order.note and order.quantity | int < 2 %} {% if
+                                            order.single %} {{ order.fulfillment_order_id }} {% else %} <span
+                                            style="color: #570303;"><b>{{
+                                                order.fulfillment_order_id }}</b></span>
+                                            {% endif %}
+                                            {% else %}
+                                            {% if order.quantity | int >= 2 %}
+                                            <span style="color: #e80f0f;"><b>{{ order.fulfillment_order_id }}</b></span>
+                                            {% else %}
+                                            <span style="color: #005a27;"><b>{{ order.fulfillment_order_id }}</b></span>
+                                            {% endif %}
+                                            {% endif %}
+                                    </small>
+                                    {% if order.delivery_info.note != "" %}
+                                    <i class='bx bx-note' data-toggle="tooltip" data-placement="top"
+                                        title="{{order.delivery_info.note}}" style="cursor: pointer;"></i>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{order.seller}}</small></td>
+                                <td>
+                                    {% if '.' not in order.product_id %}
+                                    <a href="https://www.etsy.com/listing/{{order.product_id}}" target="_blank"><small
+                                            data-toggle="tooltip" data-placement="top"
+                                            title="{{order.assign_designer.designer}}" style="cursor: pointer;">
+                                            {{order.sku}}</small></a>
+                                    {% else %}
+                                    <small data-toggle="tooltip" data-placement="top"
+                                        title="{{order.assign_designer.designer}}" style="cursor: pointer;">
+                                        {{order.sku}}</small>
+                                    {% endif %}
+                                </td>
+                                {% if data.nb_product_types %}
+                                <td class="editable-select" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="product_type">
+                                    <select class="form-control-sm">
+                                        <option value=""></option>
+                                        {% for type in data.nb_product_types %}
+                                        {% if type | lower == order.product_type | lower %}
+                                        <option value="{{type}}" selected>{{type}}</option>
+                                        {% else %}
+                                        <option value="{{type}}">{{type}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                {% else %}
+                                <td><small>{{order.product_type}}</small></td>
+                                {% endif %}
+                                <td class="editable-select" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="design_type">
+                                    <select class="form-control-sm">
+                                        <option value=""></option>
+                                        {% for type in data.design_types %}
+                                        {% if type | lower == order.design_type | lower %}
+                                        <option value="{{type}}" selected>{{type}}</option>
+                                        {% else %}
+                                        <option value="{{type}}">{{type}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="design_qty" style="cursor: text">
+                                    <small>{{
+                                        order.design_qty }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="design_noted" style="cursor: text">
+                                    <small>{{
+                                        order.design_noted }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="size" style="cursor: text">
+                                    <small>{{
+                                        order.size }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="color" style="cursor: text">
+                                    <small>{{
+                                        order.color }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="material"
+                                    style="cursor: text"><small>{{ order.material }}</small></td>
+                                <td><small>{{order.num_color_kit}}</small></td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="num_holder"
+                                    style="cursor: text"><small>{{ order.num_holder }}</small></td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="other_option"
+                                    style="cursor: text"><small>{{ order.other_option }}</small></td>
+                                <td data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="personalization" style="cursor: text"><small class="personalization"
+                                        data-toggle="tooltip" data-placement="top"
+                                        title="{{order.personalization}}"><span
+                                            class="limited-text">
+                                            {% if order.personalization|length > 20 %}
+                                            {{order.personalization[:20]}}...
+                                            {% else %}
+                                            {{order.personalization}}
+                                            {% endif %}
+                                        </span></small></td>
+                                <td>
+                                    <small>
+                                        {% if order.quantity | int >= 2 %}
+                                        <span style="color: #e80f0f; font-weight: bold;">{{order.quantity}}</span>
+                                        {% else %}
+                                        <span>{{order.quantity}}</span>
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                <td><small>{{order.assign_designer.designer}}</small></td>
+                                <td>
+                                    <small class="link-des">
+                                        {% if order.link_des is string and order.link_des != "" %}
+                                        <a href="{{ order.link_des }}" target="_blank">link</a>
+                                        {% elif order.link_des is iterable and order.link_des and
+                                        order.assign_designer.design_checked != true %}
+                                        {% if j2_group_perm('dev,admin,leader designer,mod,seller,leader seller', user_data) %}
+                                        <button type="button"
+                                            class="btn btn-sm rounded-pill btn-label-primary check-btn"
+                                            data-order-id="{{ order.external_id }}"
+                                            data-product-id="{{ order.product_id }}"
+                                            data-lineitem-id="{{ order.line_item_id }}" data-link="{{ order.link_des }}"
+                                            data-product-type="{{order.product_type}}">
+                                            Check
+                                        </button>
+                                        {% else %}
+                                        <button type="button"
+                                            class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                                            data-order-id="{{ order.external_id }}"
+                                            data-product-id="{{ order.product_id }}" data-link="{{ order.link_des }}"
+                                            data-product-type="{{order.product_type}}">
+                                            <i class="tf-icons bx bxs-low-vision"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% elif order.link_des is iterable and order.link_des and
+                                        order.assign_designer.design_checked == true %}
+                                        <button type="button"
+                                            class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                                            data-order-id="{{ order.external_id }}"
+                                            data-product-id="{{ order.product_id }}" data-link="{{ order.link_des }}"
+                                            data-product-type="{{order.product_type}}">
+                                            <i class="tf-icons bx bx-download"></i>
+                                        </button>
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                <td id='note_{{order.line_item_id.replace(".","_")}}'>
+                                    {% if 'designer' in user_data.groups or 'leader designer' in user_data.groups or 'mod' in user_data.groups %}
+                                        {% if order.note != '' %}
+                                        <a href="javascript:void(0)" class="edit-note"  data-line_item_id="{{order.line_item_id}}" data-disable-btn="true"  data-toggle="tooltip" data-placement="top"
+                                        title="{{order.note}}"data-order_id="{{order.external_id}}">View</a>
+                                        {% else %}
+                                        <a href="javascript:void(0)" class="edit-note"  data-line_item_id="{{order.line_item_id}}" data-disable-btn="true"  data-order_id="{{order.external_id}}"></a>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if order.note != '' %}
+                                        <a href="javascript:void(0)" class="edit-note"  data-line_item_id="{{order.line_item_id}}"  data-toggle="tooltip" data-placement="top"
+                                        title="{{order.note}}"data-order_id="{{order.external_id}}">Edit</a>
+                                        {% else %}
+                                        <a href="javascript:void(0)" class="edit-note"  data-line_item_id="{{order.line_item_id}}" data-order_id="{{order.external_id}}">Add</a>
+                                        {% endif %}
+                                    {% endif %}
+                                        
+
+                                    
+                                </td>   
+                                <td>
+                                    <select class="form-select form-select-sm form-select-color factory-select"
+                                        data-order-id="{{order.external_id}}" data-product-id="{{order.line_item_id}}">
+                                        {% for factory in data.factories.options %}
+                                        {% if factory == order.factory %}
+                                        {% if factory == 'None' %}
+                                        <option class="form-control custom-option" value="" selected></option>
+                                        {% else %}
+                                        <option class="form-control custom-option" value="{{factory}}" selected>
+                                            {{factory}}
+                                        </option>
+                                        {% endif %}
+                                        {% else %}
+                                        {% if factory == 'None' %}
+                                        <option class="form-control custom-option" value="" selected></option>
+                                        {% else %}
+                                        <option class="form-control custom-option" value="{{factory}}">{{factory}}
+                                        </option>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm form-select-color status-select"
+                                        data-order-id="{{order.external_id}}" data-product-id="{{order.line_item_id}}"
+                                        data-product-type="{{order.product_type}}"
+                                        data-product-type="{{order.product_type}}" data-link-des="{{order.link_des}}"
+                                        data-sku="{{order.sku}}">
+                                        {% for status in data.status.options %}
+                                        {% if status == order.fulfillment_status %}
+                                        {% if status == 'None' %}
+                                        <option class="form-control custom-option" value="" selected></option>
+                                        {% else %}
+                                        <option
+                                            class="form-control custom-option {{status | replace(' ', '-') | lower }}"
+                                            value="{{status}}" selected>
+                                            {{status}}
+                                        </option>
+                                        {% endif %}
+                                        {% else %}
+                                        {% if status == 'None' %}
+                                        <option class="form-control custom-option" value=""></option>
+                                        {% else %}
+                                        <option
+                                            class="form-control custom-option {{status | replace(' ', '-') | lower }}"
+                                            value="{{status}}">{{status}}</option>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                {% if data.is_ff_ngoai %}
+                                <td><small>={{order.provider}}</small></td>
+                                {% else %}
+                                {% if j2_group_perm('dev,admin,supporter,leader support,fulfillment,leader
+                                fulfillment', user_data) %}
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="base_cost"
+                                    style="cursor: text">
+                                    <small>{{ order.base_cost }}</small>
+                                </td>
+                                {% else %}
+                                <td><small>{{ order.base_cost }}</small></td>
+                                {% endif %}
+                                {% endif %}
+                                {% if data.is_ff_ngoai %}
+                                <td><small>{{order.ff_provider_date}}</small></td>
+                                {% else %}
+                                <td class="editable-date" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{ order.line_item_id }}" data-field="shipping_day">
+                                    {% if order.shipping_day != "" %}
+                                    <input type="text" class="form-control-sm bs-rangepicker-single"
+                                        value="{{ order.shipping_day }}" />
+                                    {% else %}
+                                    <input type="text" class="form-control-sm bs-rangepicker-single"
+                                        placeholder="DD/MM/YYYY" />
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                                <td><small>{{order.delivery_info.name}}</small></td>
+                                <td><small>{{order.delivery_info.address1}}{% if order.delivery_info.address2 != '' %},
+                                        {{order.delivery_info.address2}}{%endif%}, {{order.delivery_info.city}},
+                                        {{order.delivery_info.state}} {{order.delivery_info.zip}},
+                                        {{order.delivery_info.country}}</small></td>
+                                <td><small>{{order.tracking_number}}</small></td>
+                                <td><small>{{order.tracking_company}}</small></td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="length" style="cursor: text">
+                                    <small>{{
+                                        order.length }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="width" style="cursor: text">
+                                    <small>{{
+                                        order.width }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="height" style="cursor: text">
+                                    <small>{{
+                                        order.height }}</small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="weight" style="cursor: text">
+                                    <small>{{
+                                        order.weight }}</small>
+                                </td>
+                                {% if data.is_ff_ngoai %}
+                                <td><small class="badge rounded bg-label-success">{{order.ff_provider_status}}</small>
+                                </td>
+                                {% else %}
+                                <td class="editable-date" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{ order.line_item_id }}" data-field="dispatch_day">
+                                    {% if order.dispatch_day != "" %}
+                                    <input type="text" class="form-control-sm bs-rangepicker-single"
+                                        value="{{ order.dispatch_day }}" />
+                                    {% else %}
+                                    <input type="text" class="form-control-sm bs-rangepicker-single"
+                                        placeholder="DD/MM/YYYY" />
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                                <td>
+                                    <small style="color: #930e0e;"><b>{{order.design_note}}</b></small>
+                                </td>
+                                <td class="editable-select" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{order.line_item_id}}" data-field="shipping_unit"
+                                    style="cursor: pointer">
+                                    <select class="form-control-sm">
+                                        <option value=""></option>
+                                        <option value="HNN" {% if order.shipping_unit=="HNN" %} selected {% endif %}>HNN
+                                        </option>
+                                        <option value="MUltrans" {% if order.shipping_unit=="MUltrans" %} selected {%
+                                            endif %}>MUltrans
+                                        </option>
+                                    </select>
+                                </td>
+                                <td><small>{{order.shipping_cost}}</small></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                            data-bs-toggle="dropdown"><i
+                                                class="bx bx-dots-vertical-rounded"></i></button>
+                                        <div class="dropdown-menu">
+                                            {% if j2_group_perm('dev,admin,supporter,leader support,fulfillment,leader
+                                            fulfillment,seller,leader seller,other team', user_data) %}
+                                            <a class="dropdown-item"
+                                                href="/edit_order?external_id={{order.external_id}}&line_item_id={{order.line_item_id}}"><i
+                                                    class="bx bx-edit-alt me-1"></i> Edit order</a>
+                                            <a class="dropdown-item"
+                                                href="/edit_address?external_id={{order.external_id}}"><i
+                                                    class="bx bx-edit-alt me-1"></i> Edit address</a>
+                                            {% if data.is_ff_ngoai %}
+                                            <span class="dropdown-item"
+                                                onclick="show_provider('{{order.external_id}}')"><i
+                                                    class="bx bx-closet me-1"></i>Fulfill</span>
+                                            {% endif %}
+                                            {% endif %}
+                                            {% if j2_group_perm('dev,admin', user_data) %}
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                                onclick="uploadOrderDesign('{{order.team}}', '{{order.external_id}}', '{{order.line_item_id}}', '{{order.sales_account_id}}', '{{order.seller}}', '{{order.create_at}}')"><i
+                                                    class="bx bx-upload me-1"></i>
+                                                Upload Design</a>
+                                            {% elif j2_group_perm('designer,leader designer', user_data) and order.fulfillment_status in ['', 'Designing', 'Rejected', 'Design uploaded', 'Sai design'] %}
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                                onclick="uploadOrderDesign('{{order.team}}', '{{order.external_id}}', '{{order.line_item_id}}', '{{order.sales_account_id}}', '{{order.seller}}', '{{order.create_at}}')"><i
+                                                    class="bx bx-upload me-1"></i>
+                                                Upload Design</a>
+                                            {% endif %}
+                                            <a class="dropdown-item order-history" href="#"
+                                                data-order-id="{{order.external_id}}"
+                                                data-lineitem-id="{{order.line_item_id}}"><i class='bx bx-history'></i>
+                                                History</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- pagination -->
+                    <div class="row mt-3">
+                        <div class="col text-center">
+                            <!-- Basic Square Pagination -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-round pagination-primary justify-content-center">
+                                    <li class="page-item first">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                            href="{{ data.page_navi.route_name }}?page=1"><i
+                                                class="tf-icon bx bx-chevrons-left"></i></a>
+                                    </li>
+                                    {% if data.page_navi.total_page > 5 %}
+                                    {% set current_page = data.page_navi.page_number| int %}
+                                    <li class="page-item prev">
+                                        {% if current_page == 1 %}
+                                        <a class="page-link" href="javascript:void(0)"><i
+                                                class="tf-icon bx bx-chevron-left"></i></a>
+                                        {% else %}
+                                        <a class="page-link"
+                                            href="{{ data.page_navi.route_name }}?page={{ current_page - 1 }}"><i
+                                                class="tf-icon bx bx-chevron-left"></i></a>
+                                        {% endif %}
+                                    </li>
+                                    {% for page in range(data.page_navi.start_page, data.page_navi.end_page + 1) %}
+                                    <li class="page-item{% if page == data.page_navi.page_number %} active{% endif %}">
+                                        <a class="page-link" href="{{ data.page_navi.route_name }}?{{data.param_url}}&page={{ page }}">{{
+                                            page }}</a>
+                                    </li>
+                                    {% endfor %}
+
+                                    <li class="page-item next">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                        href="{{ data.page_navi.route_name }}?{{data.param_url}}&page={{ current_page + 1 }}"><i
+                                                class="tf-icon bx bx-chevron-right"></i></a>
+                                    </li>
+                                    {% else %}
+                                    {% for page in range(1, data.page_navi.total_page + 1) %}
+                                    <li class="page-item{% if page == data.page_navi.page_number %} active{% endif %}">
+                                        <a class="page-link" href="{{ data.page_navi.route_name }}?{{data.param_url}}&page={{ page }}">{{
+                                            page }}</a>
+                                    </li>
+                                    {% endfor %}
+                                    {% endif %}
+                                    <li class="page-item last">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                            href="{{ data.page_navi.route_name }}?page={{ data.page_navi.total_page }}"><i
+                                                class="tf-icon bx bx-chevrons-right"></i></a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            <!--/ Basic Square Pagination -->
+                        </div>
+                    </div>
+                    <!--/ pagination -->
+                </div>
+            </div>
+        </div>
+
+        <!--/ Hoverable Table rows -->
+        <div class="modal fade" id="uploadOrderDesign" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <!-- Multi  -->
+                        <div class="col-12">
+                            <div class="card">
+                                <h5 class="card-header">Multiple</h5>
+                                <div class="card-body">
+                                    <form method="POST" class="dropzone needsclick" id="dropzone-multi">
+                                        <!-- Hidden input fields for order id and product -->
+                                        <input type="hidden" id="team" name="team" value="" />
+                                        <input type="hidden" id="order_id" name="order_id" value="" />
+                                        <input type="hidden" id="product_id" name="product_id" value="" />
+                                        <input type="hidden" id="line_item_id" name="line_item_id" value="" />
+                                        <input type="hidden" id="shop" name="shop" value="" />
+                                        <input type="hidden" id="seller" name="seller" value="" />
+                                        <input type="hidden" id="order_date" name="order_date" value="" />
+                                        <div class="upload-image-form">
+                                            <div class="dz-message needsclick">
+                                                Drop files here or click to upload
+                                            </div>
+                                            <div class="fallback">
+                                                <input name="file" type="file"
+                                                    accept="image/*, application/pdf, application/illustrator" />
+                                            </div>
+                                            <!-- submit btn -->
+                                            <div class="text-center mt-3">
+                                                <button type="button" class="btn btn-primary"
+                                                    id="uploadBtn">Upload</button>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Multi  -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--/ Hoverable Table rows -->
+        <div class="modal fade" id="uploadOrderDesignReuse" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <!-- Multi  -->
+                        <div class="col-12">
+                            <div class="card">
+                                <h5 class="card-header">Multiple</h5>
+                                <div class="card-body">
+                                    <form method="POST" class="dropzone needsclick" id="dropzone-multi-2">
+                                        <!-- Hidden input fields for order id and product -->
+                                        <input type="hidden" id="order_id_2" name="order_id" value="" />
+                                        <input type="hidden" id="product_id_2" name="product_id" value="" />
+                                        <input type="hidden" id="sku" name="sku" value="" />
+                                        <div class="upload-image-form">
+                                            <div class="dz-message needsclick">
+                                                Drop files here or click to upload
+                                            </div>
+                                            <div class="fallback">
+                                                <input name="file" type="file"
+                                                    accept="image/*, application/pdf, application/illustrator" />
+                                            </div>
+                                            <!-- submit btn -->
+                                            <div class="text-center mt-3">
+                                                <button type="button" class="btn btn-primary"
+                                                    id="uploadBtnReuse">Upload</button>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Multi  -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="thumbnailModal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <!-- Display the image at full size -->
+                        <div class="col-12">
+                            <div class="card">
+                                
+                                <img class="modal-image" src="" style="max-width: 100%; height: auto;"
+                                    alt="Card image cap">
+                            </div>
+                        </div>
+                        <!-- Multi  -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="export_ornc_modal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <!-- Display the image at full size -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="POST">
+                                        <!-- Hidden input fields for order id and product -->
+                                        <div class="upload-ornc-form">
+                                            <label style="margin-bottom: 6px; margin-top: 2px;"
+                                                for="date-range-picker-3">Date Range Picker</label>
+                                            <span>
+                                                <input type="text" class="form-control-sm" name="date-range"
+                                                    id="date-range-picker-3" />
+                                            </span>
+                                            <!-- submit btn -->
+                                            <div class="text-center mt-3">
+                                                <button type="button" class="btn btn-primary"
+                                                    id="uploadBtn">Upload</button>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <!-- Multi  -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="fulfillProvider" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="text-center mb-4">
+                            <h3 class="address-title">Provider</h3>
+                        </div>
+                        <form id="providerForm" class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-md mb-md-0 mb-3 custom-option-group">
+                                        <div class="form-check custom-option custom-option-icon checked">
+                                            <label class="form-check-label custom-option-content" for="merchize">
+                                                <span class="custom-option-body">
+                                                    <img width="146" height="39"
+                                                        src="https://merchize.com/wp-content/uploads/2021/04/logo.png"
+                                                        alt="Print on Demand &amp; Fulfillment Service">
+                                                    <span class="custom-option-title">Merchize</span>
+                                                </span>
+                                                <input name="customRadioIcon" class="form-check-input" type="radio"
+                                                    value="merchize" id="merchize" checked="">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md mb-md-0 mb-3 custom-option-group">
+                                        <div class="form-check custom-option custom-option-icon">
+                                            <label class="form-check-label custom-option-content" for="printify">
+                                                <span class="custom-option-body">
+                                                    <img width="146" height="39"
+                                                        src="data:image/svg+xml,%0A%3Csvg width='512' height='147' viewBox='0 0 512 147' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M168.97 37.4977C162.032 32.911 153.851 30.5699 145.537 30.792H116.724V119.44H134.594V87.3117H144.579C152.999 87.4369 161.263 85.0371 168.307 80.4218C171.777 78.0716 174.568 74.8493 176.398 71.0786C178.229 67.308 179.034 63.1219 178.734 58.9413C178.734 49.116 175.479 41.9682 168.97 37.4977ZM155.706 69.221C152.755 71.5459 149.068 72.7356 145.315 72.5738H134.594V45.6772H145.058C149.019 45.4299 152.939 46.6059 156.111 48.9932C157.506 50.3488 158.584 51.9971 159.266 53.8192C159.947 55.6414 160.216 57.5921 160.053 59.5308C160.042 61.3595 159.65 63.1657 158.901 64.8342C158.152 66.5027 157.064 67.9967 155.706 69.221Z' fill='%2339B75D'/%3E%3Cpath d='M197.009 67.3787L191.592 59.236H182.529V119.44H200.398V82.006C203.218 79.4343 206.474 77.3878 210.015 75.9635C212.96 74.8074 216.098 74.2198 219.263 74.2318V59.236C214.6 59.0405 209.954 59.8968 205.667 61.7415C202.556 63.2494 199.646 65.1434 197.009 67.3787Z' fill='%2339B75D'/%3E%3Cpath d='M245.791 59.3465H227.921V119.477H245.791V59.3465Z' fill='%2339B75D'/%3E%3Cpath d='M236.801 30.7183C235.504 30.6941 234.216 30.9442 233.023 31.4522C231.829 31.9601 230.756 32.7145 229.874 33.6659C228.032 35.5846 227.026 38.1546 227.074 40.8137C227.01 42.1685 227.225 43.5219 227.707 44.7898C228.188 46.0576 228.926 47.2125 229.874 48.1827C230.758 49.1292 231.832 49.878 233.026 50.3797C234.22 50.8813 235.506 51.1246 236.801 51.0934C238.122 51.1187 239.434 50.8735 240.657 50.373C241.88 49.8724 242.988 49.127 243.912 48.1827C244.901 47.2363 245.676 46.089 246.185 44.8178C246.693 43.5467 246.923 42.1813 246.859 40.8137C246.859 38.1329 245.797 35.5612 243.905 33.6621C242.013 31.763 239.445 30.6912 236.764 30.6814L236.801 30.7183Z' fill='%2339B75D'/%3E%3Cpath d='M293.284 57.0991C289.271 57.1538 285.306 57.9793 281.604 59.5308C277.95 60.8821 274.568 62.8789 271.619 65.426L266.866 59.2361H257.618V119.44H275.525V77.4374C277.558 75.9958 279.73 74.7614 282.009 73.7529C284.056 72.8014 286.275 72.275 288.531 72.2054C289.796 72.1376 291.061 72.339 292.242 72.7963C293.423 73.2536 294.494 73.9564 295.384 74.8582C297.145 76.9967 298.04 79.7186 297.889 82.4851V119.33H315.759V81.8956C315.965 75.6132 314.158 69.4293 310.601 64.247C307.137 59.494 301.39 57.0991 293.284 57.0991Z' fill='%2339B75D'/%3E%3Cpath d='M393.391 59.3465H375.521V119.477H393.391V59.3465Z' fill='%2339B75D'/%3E%3Cpath d='M429.351 59.2361V55.8832C429.221 53.3467 429.892 50.8335 431.267 48.6985C431.982 47.7742 432.915 47.0415 433.982 46.5657C435.05 46.0899 436.218 45.8859 437.383 45.972C438.505 45.9884 439.619 46.1494 440.699 46.451C441.958 46.819 443.189 47.2745 444.384 47.8142L449.505 35.0291C447.733 33.6404 445.705 32.6138 443.536 32.0078C441.166 31.1805 438.678 30.7449 436.167 30.7183C429.637 30.4233 423.23 32.5635 418.187 36.724C415.835 38.842 413.988 41.4611 412.783 44.3881C411.578 47.3151 411.045 50.4753 411.224 53.6357V59.2361H401.865V74.7845H411.224V119.44H429.13V74.8951H445.821L440.81 59.2361H429.351Z' fill='%2339B75D'/%3E%3Cpath d='M490.808 59.2361L478.428 94.9754C476.328 89.0066 474.191 83.0746 471.981 77.1057C469.77 71.1369 467.633 65.2049 465.422 59.2361H446.521L466.822 111.15C468.114 114.43 468.114 118.077 466.822 121.356C465.557 124.166 463.338 126.437 460.559 127.767C457.619 129.394 454.579 130.834 451.458 132.078L457.648 146.816C463.194 145.396 468.403 142.892 472.975 139.447C477.469 136.306 480.971 131.947 483.071 126.883L509.304 59.2361H490.808Z' fill='%2339B75D'/%3E%3Cpath d='M384.364 30.7551C383.052 30.7299 381.75 30.9828 380.544 31.4972C379.337 32.0116 378.253 32.7758 377.363 33.7395C376.437 34.6738 375.709 35.7849 375.222 37.0066C374.734 38.2283 374.498 39.5356 374.526 40.8506C374.494 42.1661 374.728 43.4747 375.216 44.6969C375.703 45.9192 376.434 47.0299 377.363 47.9616C378.269 48.898 379.358 49.6368 380.563 50.1314C381.768 50.626 383.062 50.8657 384.364 50.8355C385.722 50.875 387.074 50.641 388.34 50.1473C389.606 49.6536 390.76 48.9103 391.733 47.9616C392.689 47.0404 393.449 45.9359 393.969 44.7141C394.488 43.4923 394.756 42.1782 394.756 40.8506C394.756 39.5229 394.488 38.2089 393.969 36.987C393.449 35.7652 392.689 34.6607 391.733 33.7395C390.776 32.7622 389.627 31.9927 388.359 31.4792C387.091 30.9657 385.731 30.7192 384.364 30.7551Z' fill='%2339B75D'/%3E%3Cpath d='M359.715 103.45C358.622 103.749 357.495 103.91 356.362 103.929C355.201 104.018 354.037 103.816 352.975 103.34C351.913 102.863 350.987 102.128 350.282 101.202C348.894 99.0714 348.211 96.5579 348.33 94.0175V75.5951H364.357L359.199 60.1203H348.33V40.8137H330.46V59.2361H321.102V74.7845H330.46V96.4124C330.277 99.5698 330.804 102.728 332.002 105.655C333.201 108.582 335.041 111.203 337.387 113.324C342.429 117.485 348.837 119.625 355.367 119.33C357.876 119.296 360.364 118.861 362.736 118.04C364.89 117.426 366.905 116.4 368.668 115.019L363.583 102.123C362.325 102.653 361.033 103.096 359.715 103.45Z' fill='%2339B75D'/%3E%3Cpath d='M23.6174 47.4089C24.5386 42.4348 25.1649 39.4136 25.4965 37.8661C27.523 27.3653 25.4965 20.1806 20.2277 19.2227C17.3907 18.7068 15.4748 20.4385 14.2221 25.302C11.5692 35.3975 3.68447 65.647 3.68447 65.647L13.1167 52.9724C14.3465 51.3261 15.9262 49.9731 17.7421 49.011C19.5579 48.0489 21.5646 47.5017 23.6174 47.4089Z' fill='%2339B75D'/%3E%3Cpath d='M16.8748 61.631C17.8736 60.2871 19.1743 59.1969 20.6719 58.4481C22.1695 57.6993 23.8221 57.3129 25.4965 57.3201C27.4186 57.3114 29.3058 57.8342 30.9495 58.8308C31.2811 58.8308 38.3184 64.1364 42.5556 67.305H50.6614C55.6486 67.2992 60.5668 66.139 65.0308 63.9153C67.0152 62.8349 68.651 61.2119 69.7469 59.236C70.2589 58.0753 70.3501 56.7723 70.0049 55.5516C69.8325 55.0649 69.5597 54.6199 69.2042 54.2454C68.8488 53.8709 68.4186 53.5753 67.9416 53.3777C66.7842 52.8622 65.5229 52.6225 64.2571 52.6777H23.7279C22.4328 52.7171 21.1633 53.0491 20.0148 53.6489C18.8662 54.2487 17.8683 55.1007 17.0959 56.1411L0.810529 78.2848C0.557298 78.7514 0.359452 79.246 0.221014 79.7585C0.0779673 80.39 0.0696595 81.0445 0.196632 81.6793C0.323605 82.3142 0.583005 82.9152 0.957907 83.443L16.8748 61.631Z' fill='%2339B75D'/%3E%3Cpath d='M14.5168 78.8743C15.3505 77.7433 16.3991 76.7878 17.6026 76.0626C18.806 75.3373 20.1407 74.8565 21.5301 74.6478C22.9196 74.439 24.3366 74.5064 25.7001 74.8459C27.0635 75.1855 28.3465 75.7907 29.4758 76.6268L42.9978 86.5748C44.6794 87.7339 46.0775 89.2579 47.0876 91.033C47.5588 91.9074 47.8824 92.8535 48.0455 93.8332C49.3561 94.2608 50.6992 94.5811 52.0616 94.7912C54.2598 95.1238 56.5073 94.8301 58.5463 93.9438C59.7786 93.2982 60.7154 92.2032 61.1622 90.8857C61.3087 90.3957 61.3517 89.8806 61.2882 89.3731C61.2248 88.8656 61.0564 88.3769 60.7938 87.9381C60.1501 86.8368 59.269 85.8928 58.2147 85.1747L28.7389 63.5469L28.2231 63.2153C27.3653 62.7042 26.3845 62.4367 25.386 62.4416C24.6393 62.4323 23.8985 62.5744 23.2082 62.8594C22.518 63.1443 21.8926 63.5662 21.37 64.0996L20.891 64.6891L0.663242 92.3963C0.203217 93.1625 -0.0179514 94.0485 0.0279886 94.9411C0.0739285 95.8336 0.384891 96.6922 0.921155 97.4072L14.5168 78.8743Z' fill='%2339B75D'/%3E%3Cpath d='M40.5292 47.4089H57.7725C57.4142 46.6114 57.0082 45.8363 56.5567 45.0877C54.6787 41.9047 52.317 39.0333 49.5562 36.5765C48.3813 35.3595 46.8665 34.5255 45.2098 34.1836C43.5532 33.8418 41.8319 34.008 40.2713 34.6606C39.0089 35.4391 38.1014 36.681 37.7433 38.1203C37.3852 39.5595 37.6049 41.0818 38.3554 42.3611L40.5292 47.4089Z' fill='%2339B75D'/%3E%3Cpath d='M66.7994 68.742C65.6204 69.3315 64.4045 69.8105 63.115 70.2526C59.882 71.3866 56.5112 72.0806 53.0932 72.3159C51.1036 72.3159 49.4087 72.3159 49.4087 72.3159L56.7777 77.8058L61.0885 80.9744C62.7636 82.1562 64.1596 83.6905 65.1783 85.4695C65.7739 86.5099 66.1498 87.6613 66.2829 88.8527C66.416 90.0441 66.3034 91.2501 65.952 92.3963C65.0925 95.0005 63.2383 97.1593 60.7937 98.402C57.3937 99.9179 53.5976 100.305 49.9614 99.5073L47.3454 98.9547C46.3485 101.079 44.6776 102.815 42.5925 103.892C39.6628 105.304 36.3809 105.816 33.1602 105.366C29.9342 104.847 26.7966 103.88 23.8385 102.492C23.5127 102.334 23.2237 102.11 22.9902 101.834C22.7566 101.558 22.5839 101.235 22.4831 100.888C22.3823 100.54 22.3558 100.175 22.4052 99.8169C22.4547 99.4585 22.579 99.1145 22.77 98.8073C23.086 98.3238 23.5594 97.9644 24.1099 97.7898C24.6605 97.6153 25.2544 97.6363 25.7913 97.8493C28.2938 99.0556 30.9646 99.8755 33.7129 100.281C35.9111 100.614 38.1586 100.32 40.1976 99.4336C41.4185 98.8016 42.3441 97.7174 42.7767 96.4124C42.9286 95.917 42.9743 95.3951 42.9108 94.8809C42.8473 94.3666 42.6761 93.8715 42.4082 93.428C41.9447 92.5986 41.318 91.8716 40.566 91.291L26.4176 80.7534C25.3203 79.938 23.9597 79.5582 22.5987 79.6875C21.2377 79.8168 19.9729 80.446 19.0487 81.4534L18.6803 81.8587L0.994807 105.881C0.350939 106.757 0.00252663 107.816 0 108.903C0.014752 109.604 0.176508 110.294 0.474806 110.929C0.773104 111.563 1.2013 112.128 1.7317 112.587C9.77313 119.103 18.2148 125.108 27.0072 130.567C27.6704 131.01 29.66 132.115 29.8074 132.225C34.8731 134.907 40.5474 136.229 46.2766 136.063C52.0058 135.898 57.5942 134.25 62.4969 131.281C67.3995 128.312 71.4489 124.123 74.2499 119.123C77.051 114.122 78.5081 108.481 78.4792 102.75C78.4604 98.0257 77.4565 93.3575 75.5316 89.0434C74.5368 86.9433 66.8363 68.742 66.7994 68.742Z' fill='%2339B75D'/%3E%3Cpath d='M42.6293 3.96894C42.2034 3.98786 41.7854 4.0906 41.3992 4.27127C41.013 4.45195 40.6663 4.70702 40.3788 5.02187C40.0913 5.33673 39.8688 5.70519 39.7239 6.10617C39.579 6.50714 39.5146 6.93276 39.5344 7.35865C39.5344 10.3799 39.9397 16.4224 40.0502 19.4437C40.0945 20.1195 40.3853 20.7555 40.8676 21.2309C41.3498 21.7064 41.9899 21.9882 42.6662 22.0228C43.3834 22.053 44.0835 21.799 44.6146 21.3162C45.1458 20.8333 45.4651 20.1605 45.5032 19.4437C45.5032 16.4224 46.0559 10.0852 46.0191 7.06389C46.005 6.63637 45.9056 6.21597 45.7265 5.82748C45.5475 5.43898 45.2925 5.09025 44.9767 4.80182C44.6608 4.5134 44.2903 4.29112 43.8872 4.14808C43.4841 4.00503 43.0564 3.94413 42.6293 3.96894Z' fill='%2339B75D'/%3E%3Cpath d='M70.0049 12.5169C69.2752 12.059 68.3946 11.9067 67.5535 12.0929C66.7123 12.279 65.9783 12.7887 65.5099 13.5117L58.9515 23.6809C58.5715 24.2728 58.4349 24.9888 58.5705 25.679C58.706 26.3693 59.103 26.9805 59.6786 27.3849C60.2543 27.7892 60.9639 27.9555 61.6592 27.8488C62.3545 27.7422 62.9817 27.3709 63.4097 26.8127C65.252 24.4177 69.1943 19.4437 70.7787 16.9751C71.0246 16.633 71.1999 16.2453 71.2942 15.8347C71.3885 15.424 71.4 14.9987 71.3279 14.5835C71.2559 14.1684 71.1018 13.7718 70.8746 13.417C70.6474 13.0621 70.3518 12.7561 70.0049 12.5169Z' fill='%2339B75D'/%3E%3Cpath d='M87.5061 35.1765C87.165 34.3924 86.5312 33.7725 85.7397 33.449C84.9481 33.1255 84.0616 33.124 83.2689 33.4448L72.2155 38.0872C71.584 38.3501 71.0744 38.8407 70.7878 39.4618C70.5011 40.0828 70.4584 40.789 70.6681 41.4401C70.7729 41.7798 70.9441 42.0954 71.1717 42.3686C71.3993 42.6417 71.6787 42.867 71.994 43.0315C72.3092 43.196 72.6539 43.2963 73.0081 43.3267C73.3624 43.3571 73.7191 43.317 74.0578 43.2086C76.9317 42.2875 83.011 40.519 85.8481 39.5242C86.2536 39.3613 86.621 39.1163 86.9273 38.8046C87.2336 38.4929 87.4721 38.1212 87.6278 37.7129C87.7835 37.3046 87.8531 36.8684 87.8321 36.432C87.8112 35.9955 87.7002 35.568 87.5061 35.1765Z' fill='%2339B75D'/%3E%3C/svg%3E%0A"
+                                                        alt="Print on Demand &amp; Fulfillment Service">
+                                                    <span class="custom-option-title">Printify</span>
+                                                </span>
+                                                <input name="customRadioIcon" class="form-check-input" type="radio"
+                                                    value="printify" id="printify">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md mb-md-0 mb-3 custom-option-group">
+                                        <div class="form-check custom-option custom-option-icon">
+                                            <label class="form-check-label custom-option-content" for="gearment">
+                                                <span class="custom-option-body">
+                                                    <img width="146" height="39"
+                                                        src="data:image/svg+xml,%0A%3Csvg version='1.0' xmlns='http://www.w3.org/2000/svg' width='2000.000000pt' height='471.000000pt' viewBox='0 0 2000.000000 471.000000' preserveAspectRatio='xMidYMid meet'%3E%3Cg transform='translate(0.000000,471.000000) scale(0.100000,-0.100000)'%0Afill='%23000000' stroke='none'%3E%3Cpath d='M2280 4144 c-119 -62 -281 -169 -386 -255 -268 -218 -462 -463 -614%0A-774 -81 -165 -111 -242 -69 -175 125 201 244 338 386 444 156 117 353 203%0A553 241 128 25 371 26 492 2 263 -52 497 -182 686 -381 l81 -86 185 0 186 0 0%0A193 0 194 -94 95 c-306 311 -695 500 -1128 547 -156 17 -162 16 -278 -45z'/%3E%3Cpath d='M4720 2360 l0 -920 805 0 805 0 0 155 0 155 -647 2 -648 3 -3 608 -2%0A607 650 0 650 0 0 155 0 155 -805 0 -805 0 0 -920z'/%3E%3Cpath d='M7605 3270 c-11 -4 -34 -23 -52 -41 -17 -19 -257 -414 -533 -879%0A-276 -465 -511 -860 -522 -877 l-20 -33 179 0 178 0 409 701 409 701 198 -334%0Ac109 -183 199 -336 199 -340 0 -4 -125 -9 -277 -10 l-277 -3 -67 -115 c-38%0A-63 -68 -118 -69 -122 0 -5 190 -8 423 -8 l423 0 134 -235 134 -235 189 0 189%0A0 -14 23 c-8 12 -243 407 -523 877 -279 470 -520 868 -534 883 -14 16 -38 35%0A-53 43 -30 15 -91 18 -123 4z'/%3E%3Cpath d='M9000 2360 l0 -920 155 0 155 0 0 765 0 766 548 -3 547 -3 56 -26%0Ac31 -15 72 -42 91 -62 68 -68 101 -213 79 -342 -22 -122 -78 -202 -176 -247%0A-49 -23 -55 -23 -482 -26 l-433 -3 0 -134 0 -135 337 -2 338 -3 228 -273 229%0A-272 221 0 221 0 -40 43 c-124 130 -494 538 -493 545 0 4 28 21 62 37 39 19%0A87 55 128 96 114 113 169 264 169 463 0 269 -108 475 -305 578 -143 75 -106%0A72 -912 75 l-723 4 0 -921z'/%3E%3Cpath d='M11814 3270 c-34 -13 -73 -68 -89 -123 -39 -139 -455 -1691 -455%0A-1699 0 -5 67 -7 151 -6 l152 3 133 500 c73 275 150 562 170 638 20 76 41 134%0A45 130 4 -4 118 -264 254 -578 135 -314 258 -590 272 -613 55 -95 178 -108%0A255 -25 22 22 359 775 534 1192 8 19 17 32 19 29 3 -3 81 -290 174 -637 93%0A-348 171 -634 173 -637 3 -2 73 -3 155 -2 l150 3 -232 865 c-128 476 -240 880%0A-249 898 -47 92 -194 97 -253 9 -11 -17 -146 -319 -299 -670 -152 -351 -280%0A-634 -284 -630 -3 4 -130 292 -280 638 -150 347 -284 645 -298 664 -14 18 -40%0A39 -58 47 -37 15 -107 18 -140 4z'/%3E%3Cpath d='M14060 2360 l0 -920 805 0 805 0 0 155 0 155 -650 0 -650 0 0 610 0%0A610 645 0 645 0 0 155 0 155 -800 0 -800 0 0 -920z'/%3E%3Cpath d='M15915 3270 c-32 -13 -75 -64 -85 -101 -6 -21 -10 -358 -10 -881 l0%0A-848 145 0 145 0 0 665 c0 375 4 665 9 665 5 0 301 -294 658 -654 585 -589%0A654 -656 694 -666 80 -22 144 3 184 71 20 33 20 55 23 897 l3 862 -151 0 -150%0A0 0 -661 0 -661 -650 644 c-358 353 -665 651 -683 661 -33 18 -98 22 -132 7z'/%3E%3Cpath d='M17830 3105 l0 -175 340 0 340 0 0 -745 0 -745 155 0 155 0 2 743 3%0A742 338 3 337 2 0 175 0 175 -835 0 -835 0 0 -175z'/%3E%3Cpath d='M679 3115 c-196 -421 -222 -907 -72 -1355 41 -124 125 -305 156 -338%0A31 -33 174 -120 303 -185 369 -185 732 -268 1094 -253 193 8 220 13 220 36 0%0A15 -11 20 -57 25 -373 43 -725 207 -991 460 -318 303 -509 717 -583 1265 -6%0A47 -14 166 -18 265 l-6 179 -46 -99z'/%3E%3Cpath d='M5270 2360 l0 -130 495 0 495 0 0 130 0 130 -495 0 -495 0 0 -130z'/%3E%3Cpath d='M14600 2360 l0 -130 495 0 495 0 0 130 0 130 -495 0 -495 0 0 -130z'/%3E%3Cpath d='M2190 2200 l0 -150 745 0 746 0 -6 -37 c-29 -171 -88 -342 -180 -521%0A-195 -384 -493 -691 -908 -934 l-102 -60 75 6 c149 11 327 56 503 127 500 201%0A885 611 1056 1124 58 173 101 417 101 568 l0 27 -1015 0 -1015 0 0 -150z'/%3E%3C/g%3E%3C/svg%3E"
+                                                        alt="Print on Demand &amp; Fulfillment Service">
+                                                    <span class="custom-option-title">Gearment</span>
+                                                </span>
+                                                <input name="customRadioIcon" class="form-check-input" type="radio"
+                                                    value="gearment" id="gearment">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-3 text-center">
+                                <button type="submit" id="submitProvider"
+                                    class="btn btn-primary me-sm-3 me-1">Submit</button>
+                                <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"
+                                    aria-label="Close">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="noteModal2" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <!-- Multi  -->
+                        <div class="col-12">
+                            <div class="text-center mb-4">
+                                <h3 class="note-title"></h3>
+                            </div>
+                            <form method="POST" class="updateNoteForm">
+                                <div class="mb-3">
+                                    <label for="NoteArea" class="form-label">Note</label>
+                                    {% if 'designer' in user_data.groups or 'leader designer' in user_data.groups or 'mod' in user_data.groups %}
+                                    <div class="form-control textarea" contenteditable="true"  id="NoteArea" cols="30" rows="10"></div>
+                                    {% else %}
+                                    <textarea name="NoteArea" class="form-control textarea" id="NoteArea" cols="30" rows="5"></textarea>
+                                    {% endif %}
+                                  </div>
+                                  <div class="text-center mt-3">
+                                    <button type="button" class="btn btn-primary"
+                                        id="update-note-btn" >Submit</button>
+                                    </div>
+                            </form>
+                        </div>
+                        <!-- Multi  -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            function show_thumbnail(link) {
+                $('#thumbnailModal .modal-image').attr('src', link);
+                $('#thumbnailModal').modal('show');
+            };
+            function linkify(inputText) {
+                var replacedText, replacePattern1, replacePattern2, replacePattern3;
+                if (inputText.indexOf("<a ")) {
+                    //URLs starting with http://, https://, or ftp://
+                    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+                    replacedText = inputText.replace(replacePattern1, '<div contentEditable="false" ><a href="$1" target="_blank">$1</a></div>');
+
+                    
+
+                    //Change email addresses to mailto:: links.
+                    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+                    replacedText = replacedText.replace(replacePattern3, '<div contentEditable="false" ><a href="mailto:$1">$1</a></div>');
+                } else {
+                    replacedText = inputText;
+                }
+                return replacedText;
+            }
+            function show_provider(order_id) {
+                $('#submitProvider').data('order_id', order_id);
+                $('#fulfillProvider').modal('show');
+            };
+            $("#submitProvider").click(function (e) {
+                e.preventDefault();
+                const val = $("input[name='customRadioIcon']:checked").val();
+                const order_id = $('#submitProvider').data('order_id');
+                var url = `/fulfillment_page?provider=${val}&order_id=${order_id}`;
+                $("#providerModal").modal('hide');
+                window.open(url, '_blank');
+            });
+            function click_note(){
+                $('.edit-note').click(function(e){
+                    let line_item_id = $(this).data('line_item_id')
+                    let order_id = $(this).data('order_id')
+                    let note =  $(this).data('bs-original-title')
+                    console.log(note);
+                    let disable_btn = $(this).data('disable-btn')
+                    if (note==undefined){
+                        note = ''
+                    }
+                    if (disable_btn == true) {
+                        $('#noteModal2 .updateNoteForm #update-note-btn').unbind("click");
+                        $('#noteModal2 .updateNoteForm #update-note-btn').addClass('disabled');
+                        
+                    }else{
+                        $('#noteModal2 .updateNoteForm #update-note-btn').data('line_item_id',line_item_id);
+                        $('#noteModal2 .updateNoteForm #update-note-btn').data('order_id',order_id);
+                        $('#noteModal2 .updateNoteForm #update-note-btn').bind("click");
+                    }   
+                    show_add_note(note,order_id,line_item_id,disable_btn)
+                    
+                });
+            };
+            click_note()
+            function show_add_note(order_note,order_id,line_item_id,noteditable) {
+                
+                $('#noteModal2 .modal-body .textarea').val(order_note);
+                if (noteditable){
+                    console.log(linkify(order_note));
+
+                    
+                    $('#noteModal2 .modal-body .textarea').html(linkify(order_note));
+                }
+                document.querySelector('#noteModal2 .note-title').innerHTML= order_id
+                $('#noteModal2').modal('show');
+            };
+            
+            $('#noteModal2 .updateNoteForm #update-note-btn').click(function(e){
+                e.preventDefault();
+                let formData = new FormData();
+                let order_id_data = $(this).data('order_id');
+                let line_item_id_data = $(this).data('line_item_id');
+                let note = $('#noteModal2 .modal-body .textarea').val();
+                console.log(note);
+                formData.append('order_id', order_id_data);
+                formData.append('line_item_id', line_item_id_data);
+                formData.append('note', note);
+                $.ajax({
+                    type: 'POST',
+                    data: formData,
+                    url: '/api/edit_order_note',
+                    success: function (data) {
+                        if(data['status'] == 200){
+                            let td = document.querySelector("#note_" + line_item_id_data.toString().replace('.','_'))
+                            console.log("#note_" + line_item_id_data.toString().replace('.','_'));
+                            let a = '<a class="edit-note" href="javascript:void(0)" data-order_id='+order_id_data+' ' +'data-line_item_id='+line_item_id_data+ ' " data-toggle="tooltip" data-placement="top"  title="'+note+'" >Edit</a>'
+                            td.innerHTML = a;
+                            click_note()
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('#noteModal2').modal('hide');
+                            let textarea1 = document.querySelector('#noteModal2 .modal-body .textarea');
+                            textarea1.innerHTML = 'Tool lỗi vui lòng F5 để thử lại';
+                        }
+                        else{
+                            alert(data['message']);
+                        }
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                });
+            });
+            $('#export_ornc').on('click', function () {
+                $('#export_ornc_modal').modal('show');
+            });
+            $('#export_ornc_modal form #uploadBtn').click(function(e){
+                e.preventDefault();
+                let formData = new FormData();
+                const date = $('#date-range-picker-3').val();
+                $.ajax({
+                    url: '/api/export_ornc',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        date: date,
+                        
+                    }),
+                    success: function (response) {
+                        if(response.status==200){
+                            alert(response.message);
+                            window.open('/list_export_ornc', '_blank').focus();
+                        }else{
+                            alert('Export ORNC failed');
+                        }
+                    },
+                    error: function (error) {
+                        console.log('error', error);
+                    }
+                });
+            });    
+        </script>
+
+
+
+        <div class="modal fade" id="linkDesModal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <!-- Images -->
+                        <div class="rounded-top">
+                            <div class="row mx-0 gy-3">
+                                <!-- Các hình ảnh sẽ được thêm vào đây bằng mã JavaScript -->
+                            </div>
+                        </div>
+                        <!--/ Images  -->
+                        <!-- btn -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- modal history -->
+        <div class="modal fade" id="historyModal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <ul class="timeline">
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- modal noteModal -->
+        <div class="modal fade" id="noteModal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <form> 
+                            <!-- Images -->
+                            <div class="mb-3">
+                                <label class="form-label" for="noteInput">Note</label>
+                                <textarea id="noteInput" class="form-control" placeholder="Note..."></textarea>
+                            </div>
+                            <!-- btn submit -->
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-primary" id="submitNote">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- modal replaceModal -->
+        <div class="modal fade" id="replaceModal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <form>
+                            <div class="row">
+                                <div class="mb-3">
+                                    <label class="form-label" for="replaceInput">Reason</label>
+                                    <select class="form-select" id="replaceInput">
+                                        <option value="ship">Ship</option>
+                                        <option value="seller">Seller</option>
+                                        <option value="xuong">Xuong</option>
+                                    </select>
+                                </div>
+                                <!-- btn submit -->
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-primary" id="submitReplace">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- modal printBarcodeModal -->
+        <div class="modal fade" id="printBarcodeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                <div class="modal-content p-3 p-md-5">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <form>
+                            <div class="row">
+                                <label class="form-label" for="totalBarcode">Barcode quantity</label>
+                                <div class="col-md-9 mb-3">
+                                    <input type="range" class="form-control-range range-slider" min="1" max="2" step="1"
+                                        id="totalBarcode">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <span id="barcodeValue">2</span>
+                                </div>
+                                <!-- btn submit -->
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-primary"
+                                        id="printBarcodeButton">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('auth_static',path='libs/html2canvas/html2canvas.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/js-barcode/JsBarcode.all.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/typeahead-js/typeahead.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/select2/select2.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/forms-file-upload.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/template-customizer.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/orders.min.js') }}" defer></script>
+
+
+{% endblock %}

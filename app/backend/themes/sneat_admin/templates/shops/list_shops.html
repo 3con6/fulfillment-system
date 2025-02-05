@@ -1,0 +1,245 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Shop</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <h5 class="card-header">List Shops <a class="btn btn-primary" href="/add_shop" role="button"
+                    style="float: right;">Add Shop</a></h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table" id="table_shops">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Seller Id</th>
+                            <th>Seller Name</th>
+                            <th>Team</th>
+                            <th>Proxy</th>
+                            <th>Status</th>
+                            <th>Income</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for shop in data.shops %}
+                        <tr>
+                            <td><small>{{ loop.index }}</small></td>
+                            <td><small>{{ shop.shop }}</small></td>
+                            <td><small>{{ shop.seller_id }}</small></td>
+                            <td><small>{{ shop.seller_name }}</small></td>
+                            <td>
+                                {% if shop.team == "Vi" %}
+                                <small class="text-success">{{ shop.team }}</small>
+                                {% elif shop.team == "Tùng" %}
+                                <small class="text-info">{{ shop.team }}</small>
+                                {% elif shop.team == "Thuận" %}
+                                <small class="text-primary">{{ shop.team }}</small>
+                                {% elif shop.team == "Trung" %}
+                                <small class="text-warning">{{ shop.team }}</small>
+                                {% else %}
+                                <small>{{ shop.team }}</small>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ shop.proxy }}</small></td>
+                            <td><small>{{ shop.status }}</small></td>
+                            <!-- button to show modal income -->
+                            <td><button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#incomeModal{{ shop._id }}">Income</button></td>
+                            <!-- modal income -->
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                        data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/edit_shop?id={{shop._id}}"><i
+                                                class="bx bx-edit-alt me-1"></i>Edit</a>
+                                        <a class="dropdown-item delete_shop" data-id="{{shop._id}}"
+                                            href="/delete_shop?id={{shop._id}}"><i
+                                                class="bx bx-edit-alt me-1"></i>Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- modal income have datepicker currency and total imcome -->
+                        <div class="modal fade" id="incomeModal{{ shop._id }}" tabindex="-1" style="display: none;"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                                <div class="modal-content p-3 p-md-5">
+                                    <div class="modal-body">
+                                        <form>
+                                            <input type="hidden" name="id_{{ shop._id }}" id="id_{{ shop._id }}" value="{{ shop._id }}">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <label class="form-label" for="date-range-picker">Date Range</label>
+                                                    <input type="date" class="form-control" name="date_{{ shop._id }}" id="date_{{ shop._id }}" />
+                                                </div>
+                                                <div class="col">
+                                                    <label for="currency" class="form-label">Currency</label>
+                                                    <select class="form-select" id="currency_{{ shop._id }}" name="currency_{{ shop._id }}">
+                                                        <option value="USD">USD</option>
+                                                        <option value="AUD">AUD</option>
+                                                        <option value="EUR">EUR</option>
+                                                        <option value="GBP">GBP</option>
+                                                        <option value="VND">VND</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col">
+                                                    <label for="total_income" class="form-label">Total Income</label>
+                                                    <input type="number" class="form-control" id="total_income_{{ shop._id }}"
+                                                        name="total_income_{{ shop._id }}" step="0.01">
+                                                </div>
+
+                                                <div class="col">
+                                                    <label for="note" class="form-label">Note</label>
+                                                    <input type="text" class="form-control" id="note_{{ shop._id }}" name="note_{{ shop._id }}">
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row" id="incomeHistoryContainer_{{ shop._id }}">
+                                            </div>
+                                            <div class="text-center">
+                                                <button type="submit" id="insertIncome_{{ shop._id }}"
+                                                    class="btn btn-primary mt-3">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            // Sự kiện được kích hoạt khi modal hiển thị
+                            $('#incomeModal{{ shop._id }}').on('shown.bs.modal', function (e) {
+                                // Lấy id của cửa hàng
+                                var id = $('input[name="id_{{ shop._id }}"]').val();
+
+                                // Gọi API để lấy lịch sử thu nhập
+                                $.ajax({
+                                    url: '/api/get_income_history?id=' + id, // Thay đổi URL để phù hợp với API của bạn
+                                    type: 'GET',
+                                    success: function (response) {
+                                        // Xử lý dữ liệu thu nhập ở đây và cập nhật vào phần tử HTML trong modal
+                                        var incomeHistory = response.incomeHistory;
+                                        var incomeHistoryHtml = '';
+
+                                        for (var i = 0; i < incomeHistory.length; i++) {
+                                            var income = incomeHistory[i];
+                                            incomeHistoryHtml += '<p>' + income.date + ': ' + income.total_income + ' ' + income.currency + ' - ' + income.note + '</p>';
+                                        }
+
+                                        // Cập nhật dữ liệu thu nhập trong modal
+                                        $('#incomeHistoryContainer_{{ shop._id }}').html(incomeHistoryHtml);
+
+                                    },
+                                    error: function (response) {
+                                        alert('Failed to fetch income history');
+                                    }
+                                });
+                            });
+
+                            $('#insertIncome_{{ shop._id }}').on('click', function (e) {
+                                e.preventDefault();
+                                // get data from form
+                                var id = $('input[name="id_{{ shop._id }}"]').val();
+                                var date = $('input[name="date_{{ shop._id }}"]').val();
+                                var currency = $('select[name="currency_{{ shop._id }}"]').val();
+                                var total_income = $('input[name="total_income_{{ shop._id }}"]').val();
+                                var note = $('input[name="note_{{ shop._id }}"]').val();
+
+                                // check if data is empty
+                                if (id == '' || date == '' || currency == '' || total_income == '') {
+                                    alert('Please fill all fields');
+                                    return false;
+                                }
+
+                                if (confirm('Are you sure?')) {
+                                    $.ajax({
+                                        url: '/api/insert_income',
+                                        type: 'POST',
+                                        data: JSON.stringify({
+                                            id: id,
+                                            date: date,
+                                            currency: currency,
+                                            total_income: total_income,
+                                            note: note
+                                        }),
+                                        success: function (response) {
+                                            if (response.status == 200) {
+                                                alert('Insert income success');
+                                            } else {
+                                                alert('Insert income failed');
+                                            }
+                                            // hide modal
+                                            $('#incomeModal' + id).modal('hide');
+
+                                        },
+                                        error: function (response) {
+                                            alert('Insert income failed');
+                                            // hide modal
+                                            $('#incomeModal' + id).modal('hide');
+                                        }
+                                    });
+                                }
+                            });
+                        </script>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#table_shops').DataTable({
+            "aLengthMenu": [
+                [10, 20, 50, 100, -1],
+                [10, 20, 50, 100, "All"]
+            ],
+            "iDisplayLength": -1,
+        });
+
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+
+
+        // delete shop
+        $('.delete_shop').on('click', function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            if (confirm('Are you sure?')) {
+                $.ajax({
+                    url: '/api/delete_shop',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        id: id
+                    }),
+                    success: function (response) {
+                        alert('Delete shop success');
+                        location.reload();
+                    },
+                    error: function (response) {
+                        alert('Delete shop failed');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

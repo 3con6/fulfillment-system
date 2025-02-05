@@ -1,0 +1,180 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Invoices</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <h5 class="card-header">Table Invoices <button class="btn btn-primary" role="button" data-bs-toggle="modal"
+                    data-bs-target="#rateModal" style="float: right;">Edit rate</button></h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table" id="table_invoices">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Image</th>
+                            <th>Date</th>
+                            <th>Team</th>
+                            <th>Platform</th>
+                            <th>Transaction</th>
+                            <th>Total</th>
+                            <th>Currency</th>
+                            <th>Status</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for invoice in data.invoices %}
+                        <tr>
+                            <td><small>{{ loop.index }}</small></td>
+                            <td><img class="popup_img" data-mfp-src="data:image/png;base64,{{ invoice.img }}"
+                                    src="data:image/png;base64,{{ invoice.img }}" alt="Image" width="150"
+                                    style="cursor: zoom-in;"></td>
+                            <td><small>{{ invoice.created_at }}</small></td>
+                            <td><small>{{ invoice.team }}</small></td>
+                            <td><small>{{ invoice.platform }}</small></td>
+                            <td><small>{{ invoice.transaction }}</small></td>
+                            <td><small id="formattedTotal_{{loop.index}}">{{ invoice.total }}</small></td>
+                            <td><small>{{ invoice.currency }}</small></td>
+                            <td>
+                                {% if invoice.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% elif invoice.status == 'paid' %}
+                                <span class="badge bg-success">Paid</span>
+                                {% elif invoice.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                        data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item approve-invoice" data-id="{{ invoice._id }}"
+                                            href="javascript:void(0);"><i
+                                                class="bx bx-check-circle me-1"></i>Approve</a>
+                                        <a class="dropdown-item reject-invoice" data-id="{{ invoice._id }}"
+                                            href="javascript:void(0);"><i class="bx bx-trash me-1"></i>Reject</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <script>
+                            var total = {{ invoice.total }};
+                            
+                            var formattedTotal = total.toLocaleString();
+                            document.getElementById("formattedTotal_{{loop.index}}").textContent = formattedTotal;
+                          </script>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--/ Hoverable Table rows -->
+    <!-- modal Rate -->
+    <div class="modal fade" id="rateModal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+            <div class="modal-content p-3 p-md-5">
+                <div class="modal-body">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <form>
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label class="form-label" for="rateInput">Rate 1 USD to VND</label>
+                                <input type="number" class="form-control" id="rateInput" value="{{data.rate}}">
+                            </div>
+                            <!-- btn submit -->
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-primary" id="submitRate">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#table_invoices').DataTable({
+            "aLengthMenu": [
+                [10, 20, 50, 100, -1],
+                [10, 20, 50, 100, "All"]
+            ],
+            "iDisplayLength": -1,
+        });
+
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+
+        $('#table_invoices').on('click', '.approve-invoice', function () {
+            var id = $(this).data('id');
+            if (confirm('Are you sure?')) {
+                $.ajax({
+                    url: '/api/approve_invoice',
+                    type: 'POST',
+                    data: JSON.stringify({ id: id }),
+                    success: function (result) {
+                        alert('Invoice approved successfully');
+                        // hide modal
+                        $('#rateModal').modal('hide');
+                        window.location.reload();
+                    },
+                    error: function (err) {
+                        alert('Error approving invoice');
+                        // hide modal
+                        $('#rateModal').modal('hide');
+                    }
+                });
+            }
+        });
+
+        $('#table_invoices').on('click', '.reject-invoice', function () {
+            var id = $(this).data('id');
+            if (confirm('Are you sure?')) {
+                $.ajax({
+                    url: '/api/reject_invoice',
+                    type: 'POST',
+                    data: JSON.stringify({ id: id }),
+                    success: function (result) {
+                        alert('Invoice rejected successfully');
+                        window.location.reload();
+                    },
+                    error: function (err) {
+                        alert('Error rejecting invoice');
+                    }
+                });
+            }
+        });
+
+        $('#submitRate').click(function () {
+            var rate = $('#rateInput').val();
+            $.ajax({
+                url: '/api/update_rate',
+                type: 'POST',
+                data: JSON.stringify({ rate: rate }),
+                success: function (result) {
+                    alert('Rate updated successfully');
+                    window.location.reload();
+                },
+                error: function (err) {
+                    alert('Error updating rate');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

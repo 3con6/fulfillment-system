@@ -1,0 +1,99 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/dropzone.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Products/</span> Add product</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Add product</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label" for="name">Product name *</label>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Product name"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="cate">Category *</label>
+                                <input type="text" class="form-control" name="cate" id="cate" placeholder="Category"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="sku">Sku *</label>
+                                <input type="text" class="form-control" name="sku" id="sku" placeholder="Product sku"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="quantity">quantity *</label>
+                                <input type="number" class="form-control" name="quantity" id="quantity" value="0"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="min">Min *</label>
+                                <input type="int" class="form-control" name="min" id="min" placeholder="Min" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="material">Material *</label>
+                                <input type="text" class="form-control" name="material" id="material" placeholder="Material"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="color">Color *</label>
+                                <input type="text" class="form-control" name="color" id="color" placeholder="Color"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label" for="description">description</label>
+                                    <textarea id="description" class="form-control" name="description"
+                                        placeholder="Description"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="img" class="form-label">Product image <small
+                                        style="text-transform: lowercase;">(png, jpg, jpeg)</small></label>
+                                <input class="form-control" type="file" id="img" name="img" accept=".png, .jpg, .jpeg">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" class="dz-hidden-input" tabindex="-1"
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;">
+    <!--/ Hoverable Table rows -->
+</div>
+{% endblock %}

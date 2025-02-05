@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content%}
+
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <!-- Total Sale -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="row justify-content-center text-center mb-3 mt-3">
+                <div class="col">
+                    <label style="margin-bottom: 6px; margin-top: 2px;" for="date-range-picker-2">Date Range
+                        Picker</label>
+                    <span>
+                        <input type="text" class="form-control-sm" name="date-range" id="date-range-picker-2" />
+                    </span>
+                </div>
+                <div class="col-md-12 mt-3 text-center loading_spinner">
+                    <div class="spinner-border spinner-border-lg text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="render-results">
+                <div class="row row-bordered g-0">
+                    <div class="col-md-12">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Total Design</h5>
+                            <small class="card-subtitle">Monthly report overview</small>
+                        </div>
+                        <div class="card-body">
+                            <!-- table  -->
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="tableAnalytics">
+                                    <thead>
+                                        <tr>
+                                            <th>Ngày</th>
+                                            <th>Designer</th>
+                                            <th>Số lượng</th>
+                                            <th>Product Types</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in data.records %}
+                                        {% if record["Designer"] == "Tổng" %}
+                                        <tr class="table-success">
+                                            {% else %}
+                                        <tr>
+                                            {% endif %}
+                                            <td>{{ record["Ngày"] }}</td>
+                                            <td>{{ record["Designer"] }}</td>
+                                            <td>{{ record["Số lượng"] }}</td>
+                                            <td>{{ record["Product Types"] }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/ Total Sale -->
+    </div>
+    <!--/ Total Sale -->
+</div>
+
+
+<!-- / Content -->
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#tableAnalytics').DataTable({
+            "aLengthMenu": [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            "iDisplayLength": -1,
+            "order": [[ 0, "desc" ]]
+        });
+    });
+    $('#date-range-picker-2').on('apply.daterangepicker', function (ev, picker) {
+        var startDate = picker.startDate.format('YYYY-MM-DD');
+        var endDate = picker.endDate.format('YYYY-MM-DD');
+
+        // show loading
+        $('.loading_spinner').show();
+
+        // hide chart
+        $('.render-results').hide();
+
+        // Gửi dữ liệu ngày đã chọn lên máy chủ
+        $.ajax({
+            type: 'POST',
+            url: '/api/designer_analytics',
+            data: JSON.stringify({ startDate: startDate, endDate: endDate }),
+            _success: function (response) {
+                $('.render-results').html(response);
+                $('.loading_spinner').hide();
+                $('.render-results').show();
+
+                $('#tableAnalytics').DataTable({
+                    "aLengthMenu": [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "All"]
+                    ],
+                    "iDisplayLength": -1,
+                });
+            },
+            get success() {
+                return this._success;
+            },
+            set success(value) {
+                this._success = value;
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

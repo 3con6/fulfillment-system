@@ -1,0 +1,7 @@
+<select
+    class="form-select form-select-sm form-select-color size-select mb-3">  
+    <option class="form-control custom-option"></option>
+    {% for size in context.sizes %}
+        <option class="form-control custom-option" value ="{{size}}">{{size}}</option>
+    {% endfor %}
+</select>

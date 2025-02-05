@@ -1,0 +1,106 @@
+<div class="row">
+    <div class="col-md-12 text-center loading_spinner">
+        <div class="spinner-border spinner-border-lg text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div class="col-md-12 product-chart">
+    {% for product, values in context.products.items() %}
+        <canvas id="lineChart-{{loop.index}}" class="chartjs" data-height="500" height="500" style="display: block; box-sizing: border-box; height: 500px; width: 1329px;" width="1329"></canvas>
+        <script>
+            "use strict";
+            !function () {
+                const o = "#836AF9"
+                    , r = "#ffe800"
+                    , t = "#28dac6"
+                    , e = "#EDF1F4"
+                    , a = "#2B9AFF"
+                    , i = "#84D0FF";
+                let l, n, d, s, c;
+                document.querySelectorAll(".chartjs").forEach((function (o) {
+                    o.height = o.dataset.height
+                }
+                ));
+                const y = document.getElementById("lineChart-{{loop.index}}");
+                if (y) {
+                    new Chart(y, {
+                        type: "line",
+                        data: {
+                            labels: [{% for date in values.date %}'{{ date }}', {% endfor %}],
+                            datasets: [
+                                {
+                                    data: [{% for qty in values.quantity %}{{ qty }}, {% endfor %}],
+                                    label: '{{ product }}',
+                                    borderColor: config.colors.primary,
+                                    tension: .5,
+                                    pointStyle: "circle",
+                                    backgroundColor: config.colors.primary,
+                                    fill: !1,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5,
+                                    pointHoverBorderWidth: 5,
+                                    pointBorderColor: "transparent",
+                                    pointHoverBorderColor: l,
+                                    pointHoverBackgroundColor: config.colors.primary
+                                },
+                            ]
+                        },
+                        options: {
+                            responsive: !0,
+                            maintainAspectRatio: !1,
+                            scales: {
+                                x: {
+                                    grid: {
+                                        color: s,
+                                        drawBorder: !1,
+                                        borderColor: s
+                                    },
+                                    ticks: {
+                                        color: o
+                                    }
+                                },
+                                y: {
+                                    scaleLabel: {
+                                        display: !0
+                                    },
+                                    min: 0,
+                                    // max: 400,
+                                    ticks: {
+                                        color: o,
+                                        // stepSize: 100
+                                    },
+                                    grid: {
+                                        color: s,
+                                        drawBorder: !1,
+                                        borderColor: s
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    backgroundColor: l,
+                                    titleColor: n,
+                                    bodyColor: c,
+                                    borderWidth: 1,
+                                    borderColor: s
+                                },
+                                legend: {
+                                    position: "top",
+                                    align: "start",
+                                    labels: {
+                                        usePointStyle: !0,
+                                        padding: 35,
+                                        boxWidth: 6,
+                                        boxHeight: 6,
+                                        color: c
+                                    }
+                                },
+                            }
+                        }
+                    });
+                }
+            }();
+        </script>
+    {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,161 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/dropzone.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Orders/</span> Edit Order</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Edit Order</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" class="form-control" name="_id" id="_id" value="{{ data.order._id }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="order_id">Order ID *</label>
+                                <input type="text" class="form-control" name="order_id" id="order_id"
+                                    value="{{ data.product.fulfillment_order_id }}" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="line_item_id">Item ID *</label>
+                                <input type="text" class="form-control" name="line_item_id" id="line_item_id"
+                                    value="{{ data.product.line_item_id }}" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="sku">Sku</label>
+                                <input type="text" class="form-control" name="sku" id="sku"
+                                    value="{{ data.product.sku }}">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="seller">Seller</label>
+                                <input type="text" class="form-control" name="seller" id="seller"
+                                    value="{{ data.product.seller }}">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="base_cost">Base cost ($)</label>
+                                <input type="number" class="form-control" name="base_cost" id="base_cost"
+                                    value="{{ data.product.base_cost }}">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="quantity">quantity *</label>
+                                <input type="number" class="form-control" name="quantity" id="quantity"
+                                    value="{{ data.product.quantity }}" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="link_des">Link des</label>
+                                <input type="text" class="form-control" name="link_des" id="link_des"
+                                    value="{{ data.product.link_des }}" >
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="product_type">Product type</label>
+                                <input type="text" class="form-control" name="product_type" id="product_type"
+                                    value="{{ data.product.product_type }}">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="size">Product size </label>
+                                <input type="text" class="form-control" name="size" id="size"
+                                    value="{{ data.product.size }}" >
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="material">Product material </label>
+                                <input type="text" class="form-control" name="material" id="material"
+                                    value="{{ data.product.material }}" >
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="color">Product color</label>
+                                <input type="text" class="form-control" name="color" id="color"
+                                    value="{{ data.product.color }}" >
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="personalization">Product personalization</label>
+                                <input type="text" class="form-control" name="personalization" id="personalization"
+                                    value="{{ data.product.personalization }}" >
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="num_color_kit">Number of Color Kit</label>
+                                <input type="text" class="form-control" name="num_color_kit" id="num_color_kit"
+                                    value="{{ data.product.num_color_kit }}" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="num_holder">Number of Holder</label>
+                                <input type="text" class="form-control" name="num_holder" id="num_holder"
+                                    value="{{ data.product.num_holder }}" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-12">
+                                <label class="form-label" for="note">Note</label>
+                                <textarea id="note" class="form-control" name="note">{{ data.product.note }}</textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" class="dz-hidden-input" tabindex="-1"
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;">
+    <!--/ Hoverable Table rows -->
+</div>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% set date = context.result.date %}
+{% set orders = context.result.orders %}
+{% set items = context.result.order_items %}
+{% set product_type = context.result.product_type[0] %}
+{% set count_product_type = context.result.product_type[1] %}
+
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/apex-charts/apex-charts.css') }}" />
+
+<div class="row row-bordered g-0">
+    <div class="col-md-8">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Total Sales</h5>
+            <small class="card-subtitle">Monthly report overview</small>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div id="totalSaleChart"></div>
+            </div>
+            <div class="row mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Total Items</h5>
+                </div>
+                <div id="totalItemChart"></div>
+            </div>
+            <div class="row mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Product type</h5>
+                </div>
+                <div id="productTypeChart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 p-2">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Report Orders and Items each team</h5>
+        </div>
+        <div class="row mb-3">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0 me-2">Orders</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="p-0 m-0">
+                            {% for key, value in context.count_sales.items() %}
+                            <li class="d-flex mb-4 pb-1">
+                                <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="me-2">
+                                        <h6 class="mb-1 fw-normal">
+                                            Team {{ key }}:
+                                            {% if loop.index == 1 %}
+                                            <i class='bx bx-crown text-warning'></i>
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="user-progress">
+                                        <h6 class="mb-0">{{ value }} orders</h6>
+                                    </div>
+                                </div>
+                            </li>
+                            <hr>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0 me-2">Items</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="p-0 m-0">
+                            {% for key, value in context.count_items.items() %}
+                            <li class="d-flex mb-4 pb-1">
+                                <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="me-2">
+                                        <h6 class="mb-1 fw-normal">
+                                            Team {{ key }}:
+                                            {% if loop.index == 1 %}
+                                            <i class='bx bx-crown text-warning'></i>
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="user-progress">
+                                        <h6 class="mb-0">{{ value }} items</h6>
+                                    </div>
+                                </div>
+                            </li>
+                            <hr>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-5">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0 me-2">Seller</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="p-0 m-0">
+                            {% for key, value in context.seller_sales.items() %}
+                            <li class="d-flex mb-4 pb-1">
+                                <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="me-2">
+                                        <h6 class="mb-1 fw-normal">{{ key }}:
+                                            {% if loop.index == 1 %}
+                                            <i class='bx bx-crown text-warning'></i>
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="user-progress">
+                                        <h6 class="mb-0">{{ value }} orders</h6>
+                                    </div>
+                                </div>
+                            </li>
+                            <hr>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-7">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0 me-2">Shop</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="p-0 m-0">
+                            {% for key, value in context.shop_sales.items() %}
+                            <li class="d-flex mb-4 pb-1">
+                                <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="me-2">
+                                        <h6 class="mb-1 fw-normal">
+                                            {{ key }}:
+                                            {% if loop.index == 1 %}
+                                            <i class='bx bx-crown text-warning'></i>
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="user-progress">
+                                        <h6 class="mb-0">{{ value }} orders</h6>
+                                    </div>
+                                </div>
+                            </li>
+                            <hr>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="report-list">
+        {% for team in context.private_team %}
+        <div class="report-list-item rounded-2 mb-3">
+            <div class="d-flex align-items-start">
+                <div class="d-flex justify-content-between align-items-end w-100 flex-wrap gap-2">
+                    <div class="d-flex flex-column">
+                        <span>{{team.name}}</span>
+                        <h5 class="mb-0">{{team.sale}}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="{{ url_for('auth_static',path='js/chartjs.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/apex-charts/apexcharts.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/analytics.js') }}"></script>
+<script>
+    createChart({{ date }}, {{ orders }}, 'totalSaleChart');
+    createChart({{ date }}, {{ items }}, 'totalItemChart');
+    createBarChart({{ product_type }}, {{ count_product_type }}, 'productTypeChart');
+</script>

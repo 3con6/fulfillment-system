@@ -1,0 +1,141 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/select2/select2.css') }}" />
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="row row-bordered g-0">
+                <div class="card-header row">
+                    <h5 class="card-title mb-0">Personalize</h5>
+                </div>
+                <div class="card-body">
+                    <form id="myForm">
+                        {% for key, value in data.psd.custom.text.items() %}
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="text_-{{key}}">{{ key }}</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="text_-{{key}}"  name="text_-{{key}}" rows="3"></textarea>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% for key, value in data.psd.custom.art.items() %}
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="art_-{{key}}">{{ key }}</label>
+                            <div class="col-sm-10">
+
+                                <select name="art_-{{key}}" id="art_-{{key}}">
+                                    <option value=""> No Custom</option>
+                                    {% for item in data['clipart']['custom_files'][value.source] %}
+                                    <option value="{{ item.name }}" data-src="{{ item.path }}"
+                                        data-source="{{value.source}}">{{ item.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="col-md-12 text-center loading_spinner">
+                            <div class="spinner-border spinner-border-lg text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="row justify-content-end">
+                            <div class="col-sm-6">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('auth_static',path='libs/select2/select2.js') }}"></script>
+
+<script>
+    function get_form_data() {
+        const form = $("#myForm");
+        const formData = form.serializeArray();
+        var custom = { 'text': {}, 'art': {} };
+        for (var i = 0; i < formData.length; i++) {
+            var key = formData[i]['name'];
+            var value = formData[i]['value'];
+            if (key.startsWith('text_') && value != '') {
+                key = key.substring(6);
+                custom['text'][key] = { 'value': value };
+            } else if (key.startsWith('art_') && value != '') {
+                key = key.substring(5);
+                console.log("#art_-" + key);
+                var source = $('select[id="art_-' + key + '"] option:selected').data('source');
+                var path = $('select[id="art_-' + key + '"] option:selected').data('src');
+                var custom_value = { 'value': value, 'source': source, 'path': path }
+                custom['art'][key] = custom_value;
+            }
+        }
+        return custom;
+    }
+
+
+
+    $(document).ready(function () {
+        const form = $("#myForm");
+        const responseDiv = $("#response");
+        // current url
+        var url = new URL(window.location.href);
+        // getting the id
+        var mongo_id = url.searchParams.get("_id");
+        var custom = { 'text': {}, 'art': {} };
+        form.submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            $('.loading_spinner').show();
+            var data = {
+                'custom': get_form_data(),
+                'mongo_id': mongo_id
+            }
+            console.log(data);
+            $.ajax({
+                type: "POST",
+                url: "https://personalize-api.nambe.net/api/gen_pdf",
+                data: data,
+                success: function (res) {
+                    // Handle the API response here
+                    let my_uint8_array = Uint8Array.from(res, c => c.charCodeAt(0));
+                    const blob = new Blob([my_uint8_array], { type: "application/pdf" });
+                    // Create a temporary link to trigger the download
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', res.name);
+                    document.body.appendChild(link);
+                    $('.loading_spinner').hide();
+                    link.click();
+                    link.remove();
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        });
+        function formatState(state) {
+            if (!state.id) { return state.text; }
+            var $state = $(
+                '<span><img src="' + $(state.element).attr('data-src') + '" class="img-flag"  width ="30" height="30"/> ' + state.text + '</span>'
+            );
+            return $state;
+        };
+        $('select').select2({
+            minimumResultsForSearch: Infinity,
+            templateResult: formatState,
+            templateSelection: formatState
+        });
+    });
+
+
+</script>
+
+{% endblock %}

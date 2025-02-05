@@ -1,0 +1,126 @@
+{% extends "base.html" %} {% block content%}
+<!-- Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Wallet</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <h5 class="card-header">Invoice
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pricingModal"
+                    style="float: right;">
+                    Topup </button>
+            </h5>
+            <div class="modal fade" id="pricingModal" tabindex="-1" style="display: none;" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-simple modal-pricing">
+                    <div class="modal-content p-3 p-md-5">
+                        <div class="modal-body">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <div class="text-center mb-4">
+                                <h3>Topup</h3>
+                            </div>
+                            <form method="POST" id="topupMonney" enctype="multipart/form-data"
+                                class="row g-3 fv-plugins-bootstrap5 fv-plugins-framework" onsubmit="return false"
+                                novalidate="novalidate">
+                                <div class="col-12 fv-plugins-icon-container">
+                                    <label for="platform" class="form-label">Platform *</label>
+                                    <select class="form-select" id="platform" name="platform"
+                                        aria-label="Platform select" required>
+                                        <option selected value="">Open this select menu</option>
+                                        <option value="Bank tranfer">Bank tranfer</option>
+                                        <option value="Payoneer">Payoneer</option>
+                                        <option value="Pingpong">Pingpong</option>
+                                        <option value="Lianlian">Lianlian</option>
+                                        <option value="Paypal">Paypal</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="total">Total *</label>
+                                    <input type="number" id="total" class="form-control" name="total" required
+                                        value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="transaction">Transaction id / Transfer details
+                                        *</label>
+                                    <input type="text" id="transaction" name="transaction"
+                                        class="form-control expiry-date-mask" required
+                                        placeholder="Transaction id / Transfer details">
+                                </div>
+                                <div class="col-md-3 fv-plugins-icon-container">
+                                    <label for="currency" class="form-label">Currency *</label>
+                                    <select class="form-select" id="currency" name="currency"
+                                        aria-label="Currency select" required>
+                                        <option selected value=""></option>
+                                        <option value="VND">VND</option>
+                                        <option value="USD">USD</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="img" class="form-label">Image <small
+                                            style="text-transform: lowercase;">(png, jpg, jpeg)</small></label>
+                                    <input class="form-control" type="file" id="img" name="img"
+                                        accept=".png, .jpg, .jpeg">
+                                </div>
+                                <input type="hidden" name="team" value="{{data.team.name}}">
+                                <input type="hidden" name="old_balance" value="{{data.old_balance}}">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-primary me-sm-3 me-1 mt-3">Submit</button>
+                                    <button type="reset" class="btn btn-label-secondary btn-reset mt-3"
+                                        data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-datatable table-responsive">
+                {% if data == {} %}
+                <h2>You are not part of another team. Please contact the admin.</h2>
+                {% else %}
+                <table class="invoice-list-table table border-top">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Team</th>
+                            <th class="text-truncate">Issued Date</th>
+                            <th>Invoice Status</th>
+                            <th>Transaction id</th>
+                            <th>Type</th>
+                            <th>Total</th>
+                            <th>Currency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in data.invoice %}
+                        <tr>
+                            <td>#{{item.id}}</td>
+                            <td>{{item.team}}</td>
+                            <td>{{item.created_at}}</td>
+                            <td>
+                                {% if item.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% elif item.status == 'paid' %}
+                                <span class="badge bg-success">Paid</span>
+                                {% elif item.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td>{{item.transaction}}</td>
+                            <td>{{item.platform}}</td>
+                            <td>{{item.total}}</td>
+                            <td>{{item.currency}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- pricingModal -->
+        <!--/ pricingModal -->
+
+    </div>
+</div>
+<!-- / Content -->
+<script src="{{ url_for('auth_static',path='js/topup.js') }}"></script>
+{% endblock %}

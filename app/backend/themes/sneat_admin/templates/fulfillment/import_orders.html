@@ -1,0 +1,103 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/dropzone/dropzone.css') }}" />
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/config.js') }}"></script>
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Products</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="container-xxl">
+                <div class="col-12">
+                    <div class="mb-4">
+                        <div class="row">
+                            <div class="col-4 card-header">
+                                <h5>Basic</h5>
+                            </div>
+                            <div class="col-5"></div>
+                            <div class="col-3 card-header text-right">
+                                <small><a href="/download_csv" role="button">template csv</a></small> &nbsp;|&nbsp;
+                                <small><a href="/download_xlsx" role="button">template xlsx</a></small>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="col-md-12 text-center loading_spinner" style="display: none;">
+                                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <i>
+                                <div id="api-response" class="mb-3" style="display: none;"></div>
+                            </i>
+
+                            <form action="/import_orders" method="POST" enctype="multipart/form-data"
+                                id="dropzone-basic">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <label for="file" class="form-label">Add file here <small
+                                                style="text-transform: lowercase;">(csv, xlsx)</small></label>
+                                        <input class="form-control" type="file" id="file" name="file"
+                                            accept=".csv, .xlsx">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="team" class="form-label">Team </label>
+                                        <select class="form-select" id="team" name="team">
+                                            {% for team in data.teams %}
+                                            <option value="{{ team.name }}">{{ team.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary mt-3">Send</button>
+                            </form>
+
+                            <script>
+                                document.getElementById("dropzone-basic").addEventListener("submit", function (event) {
+                                    event.preventDefault();
+
+                                    var loadingSpinner = document.querySelector(".loading_spinner");
+                                    var apiResponseDiv = document.getElementById("api-response");
+
+                                    loadingSpinner.style.display = "block";
+                                    apiResponseDiv.style.display = "none";
+
+                                    var formData = new FormData(this);
+
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open("POST", this.action);
+                                    xhr.onload = function () {
+                                        if (xhr.status === 200) {
+                                            var response = JSON.parse(xhr.responseText);
+
+                                            apiResponseDiv.innerHTML = response.message;
+                                            apiResponseDiv.style.display = "block";
+                                        } else {
+                                            apiResponseDiv.innerHTML = "Error occurred. Please try again later.";
+                                            apiResponseDiv.style.display = "block";
+                                        }
+
+                                        loadingSpinner.style.display = "none";
+                                    };
+                                    xhr.onerror = function () {
+                                        apiResponseDiv.innerHTML = "Error occurred. Please try again later.";
+                                        apiResponseDiv.style.display = "block";
+
+                                        loadingSpinner.style.display = "none";
+                                    };
+                                    xhr.send(formData);
+                                });
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

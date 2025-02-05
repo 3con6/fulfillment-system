@@ -1,0 +1,63 @@
+{% extends "base.html" %} 
+{% block content%}
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">Users</h4>
+        <!-- Hoverable Table rows -->
+        <div class="card">
+            <h5 class="card-header">Users</h5>
+            <div class="card-body">
+                <a href="./add_user"><button class="btn btn-primary">Add user</button></a>
+            </div>
+            <div class="table text-nowrap">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Groups</th>
+                    <th>Team</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                  {% for user in data['users'] %}
+                  <tr>
+                    <td><i class="fab fa-angular fa-lg text-danger me-3"></i>{{ loop.index }}</td>
+                    <td><strong>{{ user['username'] }}</strong></td>
+                    <td>{{ user['groups'] }}</td>
+                    <td>{{ user['team'] }}</td>
+                    <td>
+                      <div class="dropdown">
+                        <button type="button" title="Add" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                          <i class="bx bx-dots-vertical-rounded"></i>
+                        </button>
+                        {% if "dev" in user['groups'] %}
+                            <!-- khong sua xoa dev -->
+                        {% elif "admin" in user['groups']%}
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="./edit_user?username={{user['username']}}"><i class="bx bx-edit-alt me-1"></i>Edit</a>
+                                {% if data['user_data']['user_id'] == user['username'] %}
+                                {% else %}
+                                <a class="dropdown-item" href="./delete_user?username={{user['username']}}" onclick="return confirm('Are you sure?')"><i class="bx bx-trash me-1"></i>Delete</a>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="./edit_user?username={{user['username']}}"><i class="bx bx-edit-alt me-1"></i>Edit</a>
+                                {% if data['user_data']['user_id'] == user['username'] %}
+                                {% else %}
+                                <a class="dropdown-item" href="./delete_user?username={{user['username']}}" onclick="return confirm('Are you sure?')"><i class="bx bx-trash me-1"></i>Delete</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!--/ Hoverable Table rows -->
+    </div>
+{% endblock %}

@@ -1,0 +1,543 @@
+{% set user_data = request.state.user_data %}
+<table class="table table-sm table-striped" id="table_products_api">
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="check-all"></th>
+            <th>Team</th>
+            <th>Account</th>
+            <th>Order Date</th>
+            <th>Order ID</th>
+            <th>Seller</th>
+            <th>SKU</th>
+            <th>Product Type</th>
+            <th>Design Type</th>
+            <th>Design price</th>
+            <th>Design note</th>
+            <th>Size/Style</th>
+            <th>Color</th>
+            <th>Material</th>
+            <th>No Color Kit</th>
+            <th>No Holder</th>
+            <th>Other Options</th>
+            <th>Personalized</th>
+            <th>Qty</th>
+            <th>Designer</th>
+            <th>Link des</th>
+            <th>Note</th>
+            <th>Xưởng</th>
+            <th>Fulfill Status</th>
+            <th>{% if context.is_ff_ngoai %} Provider {% else %} Cost {% endif %}</th>
+            <th>{% if context.is_ff_ngoai %} FF ngoai date {% else %} Shipping day {% endif %}</th>
+            <th>Full Name</th>
+            <th>Address</th>
+            <th>Tracking No</th>
+            <th>Carrier</th>
+            <th>Length</th>
+            <th>Width</th>
+            <th>Height</th>
+            <th>Weight</th>
+            <th>{% if context.is_ff_ngoai %} FF ngoai status {% else %} Dispatch day {% endif %}</th>
+            <th>Design error</th>
+            <th>Ship unit</th>
+            <th>Ship cost</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="table-border-bottom-0">
+        {% for order in context.orders %}
+        <tr class="order-row" data-status="{{order.fulfillment_status}}" data-order-id="{{ order.external_id }}"
+            data-product-id="{{order.product_id}}" data-lineitem-id="{{order.line_item_id}}">
+            <td><input class="dt-body-center" data-order-id="{{ order.external_id }}"
+                    data-product-id="{{order.product_id}}" data-item-quantity="{{order.quantity}}" type="checkbox"
+                    data-lineitem-id="{{order.line_item_id}}" data-seller-id="{{order.seller}}"
+                    data-customer="{{order.name}}"></td>
+            <td><small>{{order.team}}</small></td>
+            <td><small>{{order.sales_account_id}}</small></td>
+            <td><small>{{order.create_at}}</small></td>
+            <td>
+                <small style="cursor: pointer;" onclick="show_thumbnail('{{order.thumbnail}}')">
+                    {% if 'ship nhanh' not in order.note and order.quantity | int < 2 %} {% if order.single %} {{
+                        order.fulfillment_order_id }} {% else %} <span style="color: #570303;"><b>{{
+                            order.fulfillment_order_id }}</b></span>
+                        {% endif %}
+                        {% else %}
+                        {% if order.quantity | int >= 2 %}
+                        <span style="color: #e80f0f;"><b>{{ order.fulfillment_order_id }}</b></span>
+                        {% else %}
+                        <span style="color: #005a27;"><b>{{ order.fulfillment_order_id }}</b></span>
+                        {% endif %}
+                        {% endif %}
+                </small>
+                {% if order.delivery_info.note != "" %}
+                <i class='bx bx-note' data-toggle="tooltip" data-placement="top" title="{{order.delivery_info.note}}"
+                    style="cursor: pointer;"></i>
+                {% endif %}
+            </td>
+            <td><small>{{order.seller}}</small></td>
+            <td>
+                {% if '.' not in order.product_id %}
+                <a href="https://www.etsy.com/listing/{{order.product_id}}" target="_blank"><small data-toggle="tooltip"
+                        data-placement="top" title="{{order.assign_designer.designer}}" style="cursor: pointer;">
+                        {{order.sku}}</small></a>
+                {% else %}
+                <small data-toggle="tooltip" data-placement="top" title="{{order.assign_designer.designer}}"
+                    style="cursor: pointer;">
+                    {{order.sku}}</small>
+                {% endif %}
+            </td>
+            {% if context.nb_product_types %}
+            <td class="editable-select" data-order-id="{{ order.external_id }}"
+                data-lineitem-id="{{order.line_item_id}}" data-field="product_type">
+                <select class="form-control-sm">
+                    <option value=""></option>
+                    {% for type in context.nb_product_types %}
+                    {% if type | lower == order.product_type | lower %}
+                    <option value="{{type}}" selected>{{type}}</option>
+                    {% else %}
+                    <option value="{{type}}">{{type}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </td>
+            {% else %}
+            <td><small>{{order.product_type}}</small></td>
+            {% endif %}
+            <td class="editable-select" data-order-id="{{ order.external_id }}"
+                data-lineitem-id="{{order.line_item_id}}" data-field="product_type">
+                <select class="form-control-sm">
+                    <option value=""></option>
+                    {% for type in context.design_types %}
+                    {% if type | lower == order.design_type | lower %}
+                    <option value="{{type}}" selected>{{type}}</option>
+                    {% else %}
+                    <option value="{{type}}">{{type}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="design_qty" style="cursor: text">
+                <small>{{
+                    order.design_qty }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="design_noted" style="cursor: text">
+                <small>{{
+                    order.design_noted }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="size" style="cursor: text">
+                <small>{{
+                    order.size }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="color" style="cursor: text">
+                <small>{{
+                    order.color }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="material" style="cursor: text"><small>{{ order.material }}</small></td>
+            <td><small>{{order.num_color_kit}}</small></td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="num_holder" style="cursor: text"><small>{{ order.num_holder }}</small></td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="other_option" style="cursor: text"><small>{{ order.other_option }}</small></td>
+            <td data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="personalization" style="cursor: text"><small class="personalization" data-toggle="tooltip"
+                    data-placement="top" title="{{order.personalization}}"><span class="limited-text">
+                        {% if order.personalization|length > 20 %}
+                        {{order.personalization[:20]}}...
+                        {% else %}
+                        {{order.personalization}}
+                        {% endif %}
+                    </span></small></td>
+            <td>
+                <small>
+                    {% if order.quantity | int >= 2 %}
+                    <span style="color: #e80f0f; font-weight: bold;">{{order.quantity}}</span>
+                    {% else %}
+                    <span>{{order.quantity}}</span>
+                    {% endif %}
+                </small>
+            </td>
+            <td><small>{{order.assign_designer.designer}}</small></td>
+            <td>
+                <small class="link-des">
+                    {% if order.link_des is string and order.link_des != "" %}
+                    <a href="{{ order.link_des }}" target="_blank">link</a>
+                    {% elif order.link_des is iterable and order.link_des and
+                    order.assign_designer.design_checked != true %}
+                    {% if j2_group_perm('dev,admin,leader designer,mod,seller,leader seller', user_data) %}
+                    <button type="button" class="btn btn-sm rounded-pill btn-label-primary check-btn"
+                        data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                        data-lineitem-id="{{ order.line_item_id }}" data-link="{{ order.link_des }}"
+                        data-product-type="{{order.product_type}}">
+                        Check
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                        data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                        data-link="{{ order.link_des }}" data-product-type="{{order.product_type}}">
+                        <i class="tf-icons bx bxs-low-vision"></i>
+                    </button>
+                    {% endif %}
+                    {% elif order.link_des is iterable and order.link_des and
+                    order.assign_designer.design_checked == true %}
+                    <button type="button" class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                        data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                        data-link="{{ order.link_des }}" data-product-type="{{order.product_type}}">
+                        <i class="tf-icons bx bx-download"></i>
+                    </button>
+                    {% endif %}
+                </small>
+            </td>
+            <td id='note_{{order.line_item_id.replace(".","_")}}'>
+                {% if 'designer' in user_data.groups or 'leader designer' in user_data.groups or 'mod' in
+                user_data.groups %}
+                {% if order.note != '' %}
+                <a href="javascript:void(0)" class="edit-note" data-line_item_id="{{order.line_item_id}}"
+                    data-disable-btn="true" data-toggle="tooltip" data-placement="top" title="{{order.note}}"
+                    data-order_id="{{order.external_id}}">View</a>
+                {% else %}
+                <a href="javascript:void(0)" class="edit-note" data-line_item_id="{{order.line_item_id}}"
+                    data-disable-btn="true" data-order_id="{{order.external_id}}"></a>
+                {% endif %}
+                {% else %}
+                {% if order.note != '' %}
+                <a href="javascript:void(0)" class="edit-note" data-line_item_id="{{order.line_item_id}}"
+                    data-toggle="tooltip" data-placement="top" title="{{order.note}}"
+                    data-order_id="{{order.external_id}}">Edit</a>
+                {% else %}
+                <a href="javascript:void(0)" class="edit-note" data-line_item_id="{{order.line_item_id}}"
+                    data-order_id="{{order.external_id}}">Add</a>
+                {% endif %}
+                {% endif %}
+            </td>
+
+            <td>
+                <select class="form-select form-select-sm form-select-color factory-select"
+                    data-order-id="{{order.external_id}}" data-product-id="{{order.line_item_id}}">
+                    {% for factory in context.factories.options %}
+                    {% if factory == order.factory %}
+                    {% if factory == 'None' %}
+                    <option class="form-control custom-option" value="" selected></option>
+                    {% else %}
+                    <option class="form-control custom-option" value="{{factory}}" selected>
+                        {{factory}}
+                    </option>
+                    {% endif %}
+                    {% else %}
+                    {% if factory == 'None' %}
+                    <option class="form-control custom-option" value="" selected></option>
+                    {% else %}
+                    <option class="form-control custom-option" value="{{factory}}">{{factory}}</option>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select class="form-select form-select-sm form-select-color status-select"
+                    data-order-id="{{order.external_id}}" data-product-id="{{order.line_item_id}}"
+                    data-product-type="{{order.product_type}}" data-product-type="{{order.product_type}}"
+                    data-link-des="{{order.link_des}}" data-sku="{{order.sku}}">
+                    {% for status in context.status.options %}
+                    {% if status == order.fulfillment_status %}
+                    {% if status == 'None' %}
+                    <option class="form-control custom-option" value="" selected></option>
+                    {% else %}
+                    <option class="form-control custom-option {{status | replace(' ', '-') | lower }}"
+                        value="{{status}}" selected>
+                        {{status}}
+                    </option>
+                    {% endif %}
+                    {% else %}
+                    {% if status == 'None' %}
+                    <option class="form-control custom-option" value=""></option>
+                    {% else %}
+                    <option class="form-control custom-option {{status | replace(' ', '-') | lower }}"
+                        value="{{status}}">{{status}}</option>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </td>
+            {% if context.is_ff_ngoai %}
+            <td><small>={{order.provider}}</small></td>
+            {% else %}
+            {% if j2_group_perm('dev,admin,supporter,leader support,fulfillment,leader
+            fulfillment', user_data) %}
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="base_cost" style="cursor: text">
+                <small>{{ order.base_cost }}</small>
+            </td>
+            {% else %}
+            <td><small>{{ order.base_cost }}</small></td>
+            {% endif %}
+            {% endif %}
+            {% if context.is_ff_ngoai %}
+            <td><small>{{order.ff_provider_date}}</small></td>
+            {% else %}
+            <td class="editable-date" data-order-id="{{ order.external_id }}"
+                data-lineitem-id="{{ order.line_item_id }}" data-field="shipping_day">
+                {% if order.shipping_day != "" %}
+                <input type="text" class="form-control-sm bs-rangepicker-single" value="{{ order.shipping_day }}" />
+                {% else %}
+                <input type="text" class="form-control-sm bs-rangepicker-single" placeholder="DD/MM/YYYY" />
+                {% endif %}
+            </td>
+            {% endif %}
+            <td><small>{{order.delivery_info.name}}</small></td>
+            <td><small>{{order.delivery_info.address1}}{% if order.delivery_info.address2 != '' %},
+                    {{order.delivery_info.address2}}{%endif%}, {{order.delivery_info.city}},
+                    {{order.delivery_info.state}} {{order.delivery_info.zip}},
+                    {{order.delivery_info.country}}</small></td>
+            <td><small>{{order.tracking_number}}</small></td>
+            <td><small>{{order.tracking_company}}</small></td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="length" style="cursor: text">
+                <small>{{
+                    order.length }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="width" style="cursor: text">
+                <small>{{
+                    order.width }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="height" style="cursor: text">
+                <small>{{
+                    order.height }}</small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="weight" style="cursor: text">
+                <small>{{
+                    order.weight }}</small>
+            </td>
+            {% if context.is_ff_ngoai %}
+            <td><small class="badge rounded bg-label-success">{{order.ff_provider_status}}</small></td>
+            {% else %}
+            <td class="editable-date" data-order-id="{{ order.external_id }}"
+                data-lineitem-id="{{ order.line_item_id }}" data-field="dispatch_day">
+                {% if order.dispatch_day != "" %}
+                <input type="text" class="form-control-sm bs-rangepicker-single" value="{{ order.dispatch_day }}" />
+                {% else %}
+                <input type="text" class="form-control-sm bs-rangepicker-single" placeholder="DD/MM/YYYY" />
+                {% endif %}
+            </td>
+            {% endif %}
+            <td>
+                <small style="color: #930e0e;"><b>{{order.design_note}}</b></small>
+            </td>
+            <td class="editable-select" data-order-id="{{ order.external_id }}"
+                data-lineitem-id="{{order.line_item_id}}" data-field="shipping_unit" style="cursor: pointer">
+                <select class="form-control-sm">
+                    <option value=""></option>
+                    <option value="HNN" {% if order.shipping_unit=="HNN" %} selected {% endif %}>HNN
+                    </option>
+                    <option value="MUltrans" {% if order.shipping_unit=="MUltrans" %} selected {% endif %}>MUltrans
+                    </option>
+                </select>
+            </td>
+            <td><small>{{order.shipping_cost}}</small></td>
+            <td>
+                <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i
+                            class="bx bx-dots-vertical-rounded"></i></button>
+                    <div class="dropdown-menu">
+                        {% if j2_group_perm('dev,admin,supporter,leader support,fulfillment,leader
+                        fulfillment,seller,leader seller,other team', user_data) %}
+                        <a class="dropdown-item"
+                            href="/edit_order?external_id={{order.external_id}}&line_item_id={{order.line_item_id}}"><i
+                                class="bx bx-edit-alt me-1"></i> Edit order</a>
+                        <a class="dropdown-item" href="/edit_address?external_id={{order.external_id}}"><i
+                                class="bx bx-edit-alt me-1"></i> Edit address</a>
+                        {% if context.is_ff_ngoai %}
+                        <span class="dropdown-item" onclick="show_provider('{{order.external_id}}')"><i
+                                class="bx bx-closet me-1"></i>Fulfill</span>
+                        {% endif %}
+                        {% endif %}
+                        {% if j2_group_perm('dev,admin', user_data) %}
+                        <a class="dropdown-item" href="javascript:void(0);"
+                            onclick="uploadOrderDesign('{{order.team}}', '{{order.external_id}}', '{{order.line_item_id}}', '{{order.sales_account_id}}', '{{order.seller}}', '{{order.create_at}}')"><i
+                                class="bx bx-upload me-1"></i>
+                            Upload Design</a>
+                        {% elif j2_group_perm('designer,leader designer,other team', user_data) and
+                        order.fulfillment_status in ['', 'Designing', 'Rejected', 'Design uploaded', 'Sai design'] %}
+                        <a class="dropdown-item" href="javascript:void(0);"
+                            onclick="uploadOrderDesign('{{order.team}}', '{{order.external_id}}', '{{order.line_item_id}}', '{{order.sales_account_id}}', '{{order.seller}}', '{{order.create_at}}')"><i
+                                class="bx bx-upload me-1"></i>
+                            Upload Design</a>
+                        {% endif %}
+                        <a class="dropdown-item order-history" href="#" data-order-id="{{order.external_id}}"
+                            data-lineitem-id="{{order.line_item_id}}"><i class='bx bx-history'></i> History</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- pagination -->
+<div class="row mt-3">
+    <div class="col text-center">
+        <!-- Basic Square Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-round pagination-primary justify-content-center">
+                <li class="page-item first">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-left"></i></a>
+                </li>
+                {% if context.page_navi.total_page > 5 %}
+                <li class="page-item prev">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevron-left"></i></a>
+                </li>
+                {% for page in range(context.page_navi.start_page, context.page_navi.end_page + 1) %}
+                <li class="page-item{% if page == context.page_navi.page_number %} active{% endif %}">
+                    <a class="page-link"
+                        href="{{ context.page_navi.route_name }}?{{context.param_url}}&page={{ page }}">{{
+                        page }}</a>
+                </li>
+                {% endfor %}
+
+                <li class="page-item next">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevron-right"></i></a>
+                </li>
+                {% else %}
+                {% for page in range(1, context.page_navi.total_page + 1) %}
+                <li class="page-item{% if page == context.page_navi.page_number %} active{% endif %}">
+                    <a class="page-link"
+                        href="{{ context.page_navi.route_name }}?{{context.param_url}}&page={{ page }}">{{
+                        page }}</a>
+                </li>
+                {% endfor %}
+                {% endif %}
+                <li class="page-item last">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-right"></i></a>
+                </li>
+            </ul>
+        </nav>
+        <!--/ Basic Square Pagination -->
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        // Lắng nghe sự kiện click trên các liên kết phân trang
+        // $(".page-link").on("click", function (e) {
+        //     e.preventDefault();
+        //     const page = $(this).attr("href").split("=")[1]; // Lấy giá trị page từ href
+
+        //     // Lấy URL hiện tại
+        //     let url = new URL(window.location.href);
+
+        //     // Thêm/sửa tham số page
+        //     url.searchParams.set("page", page);
+
+        //     console.log(url.toString());
+
+        //     // Chuyển đến liên kết mới
+        //     window.location.href = url.toString();
+        // });
+
+        // Lắng nghe sự kiện click trên các nút "Next", "Prev", "First", "Last"
+        $(".page-item.next a, .page-item.prev a, .page-item.first a, .page-item.last a").on("click", function (e) {
+            e.preventDefault();
+
+            // Lấy tham số page hiện tại
+            const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+
+            // Lấy số trang cuối cùng từ thuộc tính data-total-page
+            const totalPage = parseInt($(this).data("total-page"));
+
+            // Thay đổi tham số page tương ứng với nút được nhấp vào
+            if ($(this).parent().hasClass("next")) {
+                const newPage = currentPage + 1;
+                changePage(newPage);
+            } else if ($(this).parent().hasClass("prev")) {
+                if (currentPage > 1) {
+                    const newPage = currentPage - 1;
+                    changePage(newPage);
+                }
+            } else if ($(this).parent().hasClass("first")) {
+                changePage(1);
+            } else if ($(this).parent().hasClass("last")) {
+                changePage(totalPage);
+            }
+        });
+
+        // Hàm thay đổi tham số page và chuyển đến liên kết mới
+        // function changePage(newPage) {
+        //     let url = new URL(window.location.href);
+        //     url.searchParams.set("page", newPage);
+        //     window.location.href = url.toString();
+        // }
+
+        // // Ẩn hoặc vô hiệu hóa nút "Prev" khi page = 1
+        // const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+        // if (currentPage === 1) {
+        //     $(".page-item.prev").addClass("disabled");
+        // }
+
+        // // Ẩn hoặc vô hiệu hóa nút "Next" khi page = last
+        // const totalPage = parseInt($(".page-item.last a").data("total-page"));
+        // if (currentPage === totalPage) {
+        //     $(".page-item.next").addClass("disabled");
+        // }
+    });
+    function show_thumbnail(link) {
+        $('#thumbnailModal .modal-image').attr('src', link);
+        $('#thumbnailModal').modal('show');
+    };
+    function show_provider(order_id) {
+        $('#submitProvider').data('order_id', order_id);
+        $('#fulfillProvider').modal('show');
+    };
+    $("#submitProvider").click(function (e) {
+        e.preventDefault();
+        const val = $("input[name='customRadioIcon']:checked").val();
+        const order_id = $('#submitProvider').data('order_id');
+        var url = `/fulfillment_page?provider=${val}&order_id=${order_id}`;
+        $("#providerModal").modal('hide');
+        window.open(url, '_blank');
+    });
+    function click_note() {
+        $('.edit-note').click(function (e) {
+            let line_item_id = $(this).data('line_item_id')
+            let order_id = $(this).data('order_id')
+            let note = $(this).data('bs-original-title')
+            let disable_btn = $(this).data('disable-btn')
+            if (note == undefined) {
+                note = '';
+            };
+            if (disable_btn == true) {
+                $('#noteModal2 .updateNoteForm #update-note-btn').unbind("click");
+                $('#noteModal2 .updateNoteForm #update-note-btn').addClass('disabled');
+
+            } else {
+                $('#noteModal2 .updateNoteForm #update-note-btn').data('line_item_id', line_item_id);
+                $('#noteModal2 .updateNoteForm #update-note-btn').data('order_id', order_id);
+                $('#noteModal2 .updateNoteForm #update-note-btn').bind("click");
+            };
+            show_add_note(note, order_id, line_item_id, disable_btn);
+        });
+    };
+    click_note();
+    function show_add_note(order_note, order_id, line_item_id, editable) {
+        let length = order_note.length;
+        $('#noteModal2 .modal-body .textarea').val(order_note);
+        if (editable) {
+            $('#noteModal2 .modal-body .textarea').html(linkify(order_note));
+        }
+
+        document.querySelector('#noteModal2 .note-title').innerHTML = order_id
+        $('#noteModal2').modal('show');
+    };
+
+</script>
+<!-- <script src="{{ url_for('auth_static',path='js/new_orders.min.js') }}" ></script> -->
+<!-- end pagination -->

@@ -1,0 +1,68 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/dropzone.css') }}" />
+
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/select2/select2.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Team/</span> Add team</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Add team</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label" for="name">Team name *</label>
+                                    <input type="text" class="form-control" name="name" id="name" value="{{data.team.name}}"
+                                required>
+                                    <input type="hidden" class="form-control" name="_id"  value="{{data._id}}"
+                                    required>
+                                    <div data-lastpass-icon-root="true"
+                                        style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label" for="id_label_multiple">Users</label>
+                                    <div>
+                                        <select class="js-example-basic-multiple form-control chosen-select"
+                                            name="users" id="id_label_multiple" multiple="multiple" style="width: 100%">
+                                            {% for user_ in data.team.users %}
+                                            <option value="{{user_._id}}" selected>{{user_.username}}</option>
+                                            
+                                            {%endfor%}
+                                            {% for user in data.users %}
+                                           
+                                            <option value="{{user._id}}">{{user.name}}</option>
+                                            {% endfor %}
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" class="dz-hidden-input" tabindex="-1"
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;">
+    <!--/ Hoverable Table rows -->
+</div>
+/div>
+<script src="{{ url_for('auth_static',path='libs/select2/select2.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('.js-example-basic-multiple').select2({
+            width: 'resolve' // need to override the changed default
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Products</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="table-responsive text-nowrap">
+                <table class="table" id="table_exports">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Update</th>
+                            <th>Status</th>
+                            <th>Download</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for export in data.exports|reverse %}
+                        <tr>
+                            <td><small>{{ loop.index }}</small></td>
+                            <td><small>{{ export.created_at }}</small></td>
+                            <td><small>{{ export.updated_at }}</small></td>
+                            <td><small>{{ export.status }}</small></td>
+                            {% if export.link_download_csv %}
+                            <td><a href ="{{export.link_download_csv}}">Download</a></td>
+                            {%else%}
+                            <td><small></small></td>
+                            {%endif%}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--/ Hoverable Table rows -->
+</div>
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#table_exports').DataTable({
+            "aLengthMenu": [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            "iDisplayLength": -1,
+            columnDefs: [
+                { targets: '_all', width: '50px' } // Đặt độ rộng tối đa của mỗi cột là 50px
+            ],
+        });
+
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+
+        
+
+       
+    });
+</script>
+{% endblock %}

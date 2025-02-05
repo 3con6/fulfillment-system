@@ -1,0 +1,1280 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/dropzone/dropzone.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/select2/select2.css') }}" />
+
+<style>
+    canvas {
+        outline-style: double;
+    }
+
+    img {
+        cursor: drag;
+    }
+</style>
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">FF Ngoai</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-md-7  mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary text-uppercase">{{data.provider}}</h5>
+                        {% for item in data.line_items %}
+                        <div class="container-fluid border-bottom border-danger mb-3">
+                            <div class="data-order-{{loop.index}}">
+                                <input type="hidden" id="team" name="team" value="{{data.team}}" />
+                                <input type="hidden" id="order_id" name="order_id"
+                                    value="{{item.fulfillment_order_id}}" />
+                                <input type="hidden" id="product_id" name="product_id" value="{{item.product_id}}" />
+                                <input type="hidden" id="line_item_id" name="line_item_id"
+                                    value="{{item.line_item_id}}" />
+                                <input type="hidden" id="shop" name="shop" value="{{data.shop}}" />
+                                <input type="hidden" id="seller" name="seller" value="{{item.seller}}" />
+                                <input type="hidden" id="order_date" name="order_date" value="{{data.order_date}}" />
+                                <input type="hidden" id="thumbnail" name="order_date" value="{{item.thumbnail}}" />
+                            </div>
+                            <div class="card-header py-3 d-inline-block">
+                                <ul class="nav nav-pills" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                            data-bs-target="#navs-{{loop.index}}-1-side"
+                                            aria-controls="navs-{{loop.index}}-1-side" aria-selected="false"
+                                            tabindex="-1">1
+                                            Side</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                            data-bs-target="#navs-{{loop.index}}-2-side"
+                                            aria-controls="navs-{{loop.index}}-2-side" aria-selected="true">2
+                                            Side</button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="row canvas-design">
+                                <div class="col-12">
+                                    <div class="tab-content pt-0">
+                                        <div class="tab-pane fade  active show" id="navs-{{loop.index}}-1-side"
+                                            role="tabpanel">
+                                            <div class="container front_canvas-{{loop.index}}">
+                                                <div class="mb-2"><b><i>{{item.line_item_id}}</i></b> - Template size:
+                                                    <span id="front_template"></span>
+                                                    <div class="button-groups ms-auto card-header-elements"
+                                                        style="float: right;">
+                                                        <button class="btn btn-outline-primary flip_design"
+                                                            type="button">Flip design</button>
+                                                        <button class="btn btn-primary" type="button"
+                                                            onClick="select_des('front','{{loop.index}}','navs-{{loop.index}}-1-side')">Chose
+                                                            design</button>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <b>Front</b>
+                                                    <div class="col-3">
+                                                        <label class="form-label"
+                                                            for="front-{{loop.index}}-img-x">x</label>
+                                                        <input class="form-control" id="front-{{loop.index}}-img-x"
+                                                            type="number">
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <label class="form-label"
+                                                            for="front-{{loop.index}}-img-y">y</label>
+                                                        <input class="form-control" id="front-{{loop.index}}-img-y"
+                                                            type="number">
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <label class="form-label"
+                                                            for="front-{{loop.index}}-img-w">w</label>
+                                                        <input class="form-control" id="front-{{loop.index}}-img-w"
+                                                            type="number">
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <label class="form-label"
+                                                            for="front-{{loop.index}}-img-h">h</label>
+                                                        <input class="form-control" id="front-{{loop.index}}-img-h"
+                                                            type="number">
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-12">
+                                                        <div class="des text-center justify-content-center">
+                                                            <input type="hidden" class="front_link_des" value="">
+                                                            <input type="hidden" class="front_flipping" value="false">
+                                                            <canvas class="front"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-12 text-center justify-content-center">
+                                                        <button type="button"
+                                                            class="btn btn-icon me-2 btn-primary horizontal-left">
+                                                            <i class='bx bx-horizontal-left'></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-icon me-2 btn-primary horizontal-center">
+                                                            <i class='bx bx-horizontal-center'></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-icon me-2 btn-primary horizontal-right">
+                                                            <i class='bx bx-horizontal-right'></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-icon me-2 btn-primary vertical-top">
+                                                            <i class='bx bx-vertical-top'></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-icon me-2 btn-primary vertical-center">
+                                                            <i class='bx bx-vertical-center'></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-icon me-2 btn-primary vertical-bottom">
+                                                            <i class='bx bx-vertical-bottom'></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="navs-{{loop.index}}-2-side" role="tabpanel">
+
+                                            <div class="container">
+                                                <div class="front_canvas-{{loop.index}}">
+
+                                                    <div class="mb-2"><b><i>{{item.line_item_id}}</i></b> - Template
+                                                        size:
+                                                        <span id="front_template"></span>
+                                                        <button class="btn btn-outline-primary flip_design"
+                                                            type="button">Flip design</button>
+                                                        <button class="btn btn-primary" type="button"
+                                                            onClick="select_des('front','{{loop.index}}','navs-{{loop.index}}-2-side')"
+                                                            style="float: right;">Chose
+                                                            design</button>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <b>Front</b>
+                                                        <div class="col-3">
+                                                            <label class="form-label"
+                                                                for="front-{{loop.index}}-img-x">x</label>
+                                                            <input class="form-control" id="front-{{loop.index}}-img-x"
+                                                                type="number">
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <label class="form-label"
+                                                                for="front-{{loop.index}}-img-y">y</label>
+                                                            <input class="form-control" id="front-{{loop.index}}-img-y"
+                                                                type="number">
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <label class="form-label"
+                                                                for="front-{{loop.index}}-img-w">w</label>
+                                                            <input class="form-control" id="front-{{loop.index}}-img-w"
+                                                                type="number">
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <label class="form-label"
+                                                                for="front-{{loop.index}}-img-h">h</label>
+                                                            <input class="form-control" id="front-{{loop.index}}-img-h"
+                                                                type="number">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-12">
+                                                            <div class="des text-center justify-content-center">
+                                                                <input type="hidden" class="front_link_des" value="">
+                                                                <input type="hidden" class="front_flipping"
+                                                                    value="false">
+                                                                <canvas class="front"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-12 text-center justify-content-center">
+                                                            <button type="button"
+                                                                class="btn btn-icon me-2 btn-primary horizontal-left">
+                                                                <i class='bx bx-horizontal-left'></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-icon me-2 btn-primary horizontal-center">
+                                                                <i class='bx bx-horizontal-center'></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-icon me-2 btn-primary horizontal-right">
+                                                                <i class='bx bx-horizontal-right'></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-icon me-2 btn-primary vertical-top">
+                                                                <i class='bx bx-vertical-top'></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-icon me-2 btn-primary vertical-center">
+                                                                <i class='bx bx-vertical-center'></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-icon me-2 btn-primary vertical-bottom">
+                                                                <i class='bx bx-vertical-bottom'></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <hr class="mb-4 mt-4">
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="container">
+                                                        <div class="row">
+                                                            <div class="col-12 back_canvas-{{loop.index}}">
+                                                                <div class="mb-2"><b><i>{{item.line_item_id}}</i></b> -
+                                                                    Template
+                                                                    size:
+                                                                    <span id="back_template"></span>
+                                                                    <button class="btn btn-outline-primary flip_design"
+                                                                        type="button">Flip design</button>
+                                                                    <button class="btn btn-primary" type="button"
+                                                                        onClick="select_des('back','{{loop.index}}','navs-{{loop.index}}-2-side')"
+                                                                        style="float: right;">Chose design</button>
+                                                                </div>
+                                                                <div>
+                                                                    <b>Back</b>
+                                                                    <div class="row mb-3">
+                                                                        <div class="col-3">
+                                                                            <label class="form-label"
+                                                                                for="back-{{loop.index}}-img-x">x</label>
+                                                                            <input class="form-control"
+                                                                                id="back-{{loop.index}}-img-x"
+                                                                                type="number">
+                                                                        </div>
+                                                                        <div class="col-3">
+                                                                            <label class="form-label"
+                                                                                for="back-{{loop.index}}-img-y">y</label>
+                                                                            <input class="form-control"
+                                                                                id="back-{{loop.index}}-img-y"
+                                                                                type="number">
+                                                                        </div>
+                                                                        <div class="col-3">
+                                                                            <label class="form-label"
+                                                                                for="back-{{loop.index}}-img-w">w</label>
+                                                                            <input class="form-control"
+                                                                                id="back-{{loop.index}}-img-w"
+                                                                                type="number">
+                                                                        </div>
+                                                                        <div class="col-3">
+                                                                            <label class="form-label"
+                                                                                for="back-{{loop.index}}-img-h">h</label>
+                                                                            <input class="form-control"
+                                                                                id="back-{{loop.index}}-img-h"
+                                                                                type="number">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="des text-center justify-content-center">
+                                                                    <input type="hidden" class="back_link_des" value="">
+                                                                    <input type="hidden" class="back_flipping"
+                                                                        value="false">
+                                                                    <canvas class="back"></canvas>
+                                                                </div>
+                                                                <div class="row text-center justify-content-center">
+                                                                    <div class="col-12">
+                                                                        <button type="button"
+                                                                            class="btn btn-icon me-2 btn-primary horizontal-left">
+                                                                            <i class='bx bx-horizontal-left'></i>
+                                                                        </button>
+                                                                        <button type="button"
+                                                                            class="btn btn-icon me-2 btn-primary horizontal-center">
+                                                                            <i class='bx bx-horizontal-center'></i>
+                                                                        </button>
+                                                                        <button type="button"
+                                                                            class="btn btn-icon me-2 btn-primary horizontal-right">
+                                                                            <i class='bx bx-horizontal-right'></i>
+                                                                        </button>
+                                                                        <button type="button"
+                                                                            class="btn btn-icon me-2 btn-primary vertical-top">
+                                                                            <i class='bx bx-vertical-top'></i>
+                                                                        </button>
+                                                                        <button type="button"
+                                                                            class="btn btn-icon me-2 btn-primary vertical-center">
+                                                                            <i class='bx bx-vertical-center'></i>
+                                                                        </button>
+                                                                        <button type="button"
+                                                                            class="btn btn-icon me-2 btn-primary vertical-bottom">
+                                                                            <i class='bx bx-vertical-bottom'></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="design-modal-{{loop.index}}" tabindex="-1" role="dialog"
+                                    aria-labelledby="designModalLabel" aria-hidden="true">
+
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="designModalLabel">Chose design</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="design-options row">
+                                                    {% for link in item.link_des %}
+                                                    <img src="{{link}}" class="design-image custom-option col-6"
+                                                        data-src="{{link}}" style="cursor: pointer;">
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="modal-footer">
+                                                    <div class="col-12 mt-3 text-center">
+                                                        <button type="reset"
+                                                            class="btn btn-label-info upload-design-1">Upload
+                                                            design</button>
+                                                        <button type="reset" class="btn btn-label-secondary"
+                                                            data-bs-dismiss="modal" aria-label="Close">Close</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary me-sm-3 me-1 chose-design-1">Submit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="modal fade" id="uploadDesign" tabindex="-1" style="display: none;"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                                <div class="modal-content p-3 p-md-5">
+                                    <div class="modal-body">
+                                        <!-- Multi  -->
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <h5 class="card-header">Multiple</h5>
+                                                <div class="card-body">
+                                                    <input type="hidden" class="upload-loop-index" value="" />
+                                                    <form method="POST" class="dropzone needsclick" id="dropzone-multi">
+                                                        <!-- Hidden input fields for order id and product -->
+
+                                                        <div class="upload-image-form">
+                                                            <div class="dz-message needsclick">
+                                                                Drop files here or click to upload
+                                                            </div>
+                                                            <div class="fallback">
+                                                                <input name="file" type="file"
+                                                                    accept="image/*, application/pdf, application/illustrator" />
+                                                            </div>
+                                                            <!-- submit btn -->
+                                                            <div class="text-center mt-3">
+                                                                <button type="button" class="btn btn-primary"
+                                                                    id="uploadBtn">Upload</button>
+                                                                <button type="button" class="btn btn-outline-secondary"
+                                                                    data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Multi  -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 mb-3">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 border-end">
+                                <div class="card-title">
+                                    <h4>Shipping info</h4>
+                                </div>
+                                <div>
+                                    <span>Full name:</span><b> {{data.delivery_info.name}}</b>
+                                </div>
+                                <div>
+                                    <span>Address:</span><b> {{data.delivery_info.address1}}</b>
+                                </div>
+                                <div>
+                                    <span>City:</span><b> {{data.delivery_info.city}}</b>
+                                </div>
+                                <div>
+                                    <span>State:</span><b> {{data.delivery_info.state}}</b>
+                                </div>
+                                <div>
+                                    <span>Zip:</span><b> {{data.delivery_info.zip}}</b>
+                                </div>
+                                <div>
+                                    <span>Country:</span><b> {{data.delivery_info.country}}</b>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card-title">
+                                    <h4>Product info</h4>
+                                </div>
+                                <div class="row">
+                                    {% for item in data.line_items %}
+                                    <div class="col-12 border-bottom">
+                                        <div>
+                                            <span>Item id:</span><b> {{item.line_item_id}}</b>
+                                        </div>
+                                        <div>
+                                            <span>Product sku:</span><b> {{item.sku}}</b>
+                                        </div>
+                                        <div>
+                                            <span>Product type:</span><b> {{item.product_type}}</b>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title row">
+                            <h4 class="col-4">Order details</h4>
+                            <div class="col-8">
+                                <select class="form-select form-select-sm form-select-color print_provider-select mb-3">
+                                    <option class="form-control custom-option" value="64fd7c4724e3b96b2d08a371">Merchize
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-container mt-2">
+                            {% for item in data.line_items %}
+                            <div class="container-fluid mb-3 border-bottom border-danger">
+                                <div id="item-{{loop.index}}" class="item mb-3">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="row mb-3">
+                                                <div class="col-2 grid-item border-end">Style:</div>
+                                                <div class="col-2 grid-item border-end">
+                                                    {{'-'.join(item.size.split('-')[:-1])}}</div>
+                                                <div class="col-8 grid-item border-end  product-selects">
+                                                    <select
+                                                        class="form-select form-select-sm form-select-color products-select style-select mb-3">
+                                                        <option class="form-control custom-option"></option>
+                                                        {% for product in data.print_providers[0].products %}
+                                                        <option class="form-control custom-option"
+                                                            value="{{product.id}}">{{product.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-12 text-center loading_spinner">
+                                                    <div class="spinner-border spinner-border-lg text-primary"
+                                                        role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="col-12">
+                                            <div class="row mb-3">
+                                                <div class="col-2 grid-item border-end">Size:</div>
+                                                <div class="col-2 grid-item border-end">{{item.size.split('-')[-1]}}
+                                                </div>
+                                                <div class="col-8 grid-item border-end visually-hidden size-selects">
+                                                    <select
+                                                        class="form-select form-select-sm form-select-color size-select mb-3">
+                                                        <option class="form-control custom-option"></option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="row mb-3">
+                                                <div class="col-2 grid-item border-end">Color:</div>
+                                                <div class="col-2 grid-item border-end">{{item.color}}</div>
+                                                <div class="col-8 grid-item border-end visually-hidden color-selects">
+                                                    <select
+                                                        class="form-select form-select-sm form-select-color color-select mb-3">
+                                                        <option class="form-control custom-option"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row quantity-{{loop.index}}">
+                                            <div class="col-12">
+                                                <label for="quantity">Quantity</label>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-icon me-2 btn-primary reduce">
+                                                    <i class='bx bx-minus'></i>
+                                                </button>
+                                                <input type="number" class="form-control-sm quantity form-input"
+                                                    name="quantity" value="{{item.quantity}}">
+
+                                                <button type="button" class="btn btn-sm btn-icon me-2 btn-primary add">
+                                                    <i class='bx bx-plus'></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="form-check form-check-primary mt-3">
+                                        <input class="form-check-input" type="checkbox" name="fast-shipping"
+                                            value="true" id="fast-shipping">
+                                        <label class="form-check-label" for="fast-shipping">Fast shipping</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-fulfill" type="button">Fulfill</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/select2/select2.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<script>
+    $('.form-select-color').select2({
+        width: 'resolve' // need to override the changed default
+    });
+    function select_des(position, loop_index, tab) {
+        $('#design-modal-' + loop_index + ' .chose-design-1').data('position', position);
+        $('#design-modal-' + loop_index + ' .chose-design-1').data('loop_index', loop_index);
+        $('#design-modal-' + loop_index + ' .chose-design-1').data('tab', tab);
+        $('#design-modal-' + loop_index + ' .upload-design-1').data('loop_index', loop_index)
+        $('#design-modal-' + loop_index).modal('show');
+    }
+
+    function request_async(formdata, url) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: formdata,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    resolve(response);
+                }
+            });
+        });
+    }
+
+    // Function to handle the 'Fulfill' button click event
+    function handleFulfillButtonClick() {
+        $('.loading_spinner').show();
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        let order_id = urlParams.get('order_id');
+        let print_provider_mongo_id = $('.print_provider-select').val();
+        let line_items = [];
+
+        let promises = [];
+        $('.item').each(function (i) {
+            var loop_index = (i + 1).toString();
+            var quantity = $('#item-' + loop_index + ' .quantity').val();
+            var product_ = $('#item-' + loop_index + ' .color-selects option:selected').val();
+            var size = $('#item-' + loop_index + ' .size-selects option:selected').val();
+            var tab_chose = $('#navs-' + loop_index + '-1-side').hasClass('active')
+            const order_id = document.querySelector('.data-order-' + loop_index + ' #order_id').value;
+            const product_id = document.querySelector('.data-order-' + loop_index + ' #product_id').value;
+            const line_item_id = document.querySelector('.data-order-' + loop_index + ' #line_item_id').value;
+            const shop = document.querySelector('.data-order-' + loop_index + ' #shop').value;
+            const seller = document.querySelector('.data-order-' + loop_index + ' #seller').value;
+            const order_date = document.querySelector('.data-order-' + loop_index + ' #order_date').value;
+            const thumbnail = document.querySelector('.data-order-' + loop_index + ' #thumbnail').value;
+            const now = new Date();
+
+            // Extract year, month, date, hour, and second components
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const date = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+
+            // Create a formatted string
+            const formattedTime = `${year}-${month}-${date} - ${hour}:${minute}:${second}`;
+
+            var line_item = {
+                "name": "Create Product At " + formattedTime,
+                'quantity': quantity,
+                'image': thumbnail,
+                "attributes": [{
+                    "name": 'product',
+                    "option": product_
+                }, {
+                    "name": 'size',
+                    "option": size
+                }],
+            };
+            let list_side = [];
+            let tab
+            if (tab_chose == false) {
+                list_side = ['front', 'back']
+                tab = '#navs-' + loop_index + '-2-side'
+            } else {
+                list_side = ['front']
+                tab = '#navs-' + loop_index + '-1-side'
+            }
+            for (let side of list_side) {
+                let img_X = $(tab + ' .' + side + '_canvas-' + loop_index + " #" + side + '-' + loop_index + '-img-x').val();
+                let img_Y = $(tab + ' .' + side + '_canvas-' + loop_index + " #" + side + '-' + loop_index + '-img-y').val();
+                let img_W = $(tab + ' .' + side + '_canvas-' + loop_index + " #" + side + '-' + loop_index + '-img-w').val();
+                let img_H = $(tab + ' .' + side + '_canvas-' + loop_index + " #" + side + '-' + loop_index + '-img-h').val();
+                let img_link = $(tab + ' .' + side + '_canvas-' + loop_index + " ." + side + "_link_des").val();
+                let img_flipping = $(tab + ' .' + side + '_canvas-' + loop_index + " ." + side + "_flipping").val();
+                if (img_X == '0' && img_Y == '0' && img_flipping =='false' && !img_link.includes(' ')) {
+                    line_item['design_' + side] = img_link
+                }else{
+                    const IMGformData = new FormData();
+                    IMGformData.append('img_link', img_link);
+                    IMGformData.append('flipping', img_flipping);
+                    IMGformData.append('x', img_X);
+                    IMGformData.append('y', img_Y);
+                    IMGformData.append('width', img_W);
+                    IMGformData.append('height', img_H);
+
+                    let timestamp = new Date().getTime().toString();
+                    let alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
+                    let random_alphabet = alphabet[Math.floor(Math.random() * alphabet.length)];
+                    let link_edited = new Promise(function (resolve, reject) {
+                        request_async(IMGformData, "api/image_fulfill_edit").then(function (response) {
+                            let file_image = {
+                                'filename': side + '_' + timestamp + '_' + random_alphabet + '.png',
+                                'content_base64': response['base64'],
+                            }
+                            const formData = new FormData();
+                            formData.append('image_file', JSON.stringify(file_image));
+                            formData.append('order_id', order_id);
+                            formData.append('product_id', product_id);
+                            formData.append('line_item_id', line_item_id);
+                            formData.append('shop', shop);
+                            formData.append('seller', seller);
+                            formData.append('order_date', order_date);
+                            request_async(formData, "api/upload_order_design_ff_ngoai_edited").then(function (response) {
+                                resolve(response['link_folder']);
+                            });
+                        });
+                    });
+                    let promise = new Promise(function (resolve, reject) {
+                        link_edited.then(function (link_edited) {
+                            line_item['design_' + side] = link_edited;
+                            resolve();
+                        });
+                    });
+
+                    promises.push(promise);
+                }
+                
+            };
+            Promise.all(promises).then(function () {
+                line_items.push(line_item);
+            });
+        });
+        Promise.all(promises).then(function () {
+            var data = {
+                'order_id': order_id,
+                'line_items': line_items
+            };
+            console.log(data)
+            // Send the fulfillment request
+            $.ajax({
+                type: "POST",
+                url: "/api/fulfill_merchize",
+                data: JSON.stringify(data),
+                success: function (response) {
+                    $('.loading_spinner').hide();
+                    alert(response.message);
+                    // close tab after 5s
+                    setTimeout(function () {
+                        window.close();
+                    }, 5000);
+                },
+                error: function (data) {
+                    alert(data.message);
+                }
+            });
+        });
+    }
+    // Event handler for 'Fulfill' button click
+    $('.btn-fulfill').on('click', handleFulfillButtonClick);
+
+    // Initialize select2 for the '.form-select-color' elements
+    $('.form-select-color').select2({
+        width: 'resolve' // need to override the changed default
+    });
+
+    function handleProductSelection(loop_index, mongo_id, product_id) {
+        $('#item-' + loop_index + ' .loading_spinner').show();
+
+        $.ajax({
+            url: '/api/get_ff_ngoai_variants',
+            type: 'POST',
+            data: JSON.stringify({ mongo_id: mongo_id, product_id: product_id }),
+            success: function (response) {
+                // Handle success for variants
+                $.ajax({
+                    url: '/api/get_ff_ngoai_sizes',
+                    type: 'POST',
+                    data: JSON.stringify({ sizes: response.data.sizes, placeholders: response.data.placeholder }),
+                    success: function (response) {
+                        // Handle success for sizes
+                        handleSizeSelection(loop_index, response);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
+                // Handle success for colors
+                $.ajax({
+                    url: '/api/get_ff_ngoai_colors',
+                    type: 'POST',
+                    data: JSON.stringify({ colors: response.data.colors }),
+                    success: function (response) {
+                        $('#item-' + loop_index + ' .color-selects').html(response);
+                        $('#item-' + loop_index + ' .color-selects select').select2({
+                            width: 'resolve'
+                        });
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    $('.chose-design-1').on('click', function () {
+        var position = $(this).data("position");
+        var loop_index = $(this).data("loop_index");
+        var link = $('#design-modal-' + loop_index + ' .design-image.checked').data('src');
+        var tab = $(this).data("tab");
+        canvas_create(position, loop_index, link, '#' + tab);
+        $('#design-modal-' + loop_index).modal('hide');
+
+    });
+    $('.upload-design-1').on('click', function () {
+        var loop_index = $(this).data("loop_index");
+        $('#uploadDesign .upload-loop-index').val(loop_index);
+        $('#uploadDesign').modal('show');
+        $('#design-modal-' + loop_index).modal('hide');
+    });
+
+    function canvas_create(key, loop_index_, link, tab) {
+        const classCheck = document.querySelector(tab + ' .' + key + '_canvas-' + loop_index_);
+        if (classCheck) {
+            var canvas = classCheck.querySelector('.' + key);
+            let img = new Image();
+            var canvas_scale = 1;
+            var querry_canvas = tab + ' .' + key + '_canvas-' + loop_index_;
+            img.onload = function () {
+                const quotient_canvas_scale1 = Math.floor(img.width / 700);
+                const quotient_canvas_scale2 = Math.floor(img.height / 1000);
+                canvas_scale = Math.max(quotient_canvas_scale1, quotient_canvas_scale2);
+                canvas.height = Math.floor(img.height / canvas_scale );
+                let remainder_height = img.height% canvas_scale
+                canvas.width = Math.floor(img.width / canvas_scale);
+                let remainder_width = img.width% canvas_scale
+                $(tab + ' #' + key + '_template').html(img.width.toString() + 'x' + img.height.toString());
+
+
+
+                process_Canvas(canvas, key, link, canvas_scale, loop_index_, querry_canvas,remainder_height,remainder_width);
+            };
+            img.src = link;
+            $(querry_canvas + ' .' + key + '_link_des').val(link);
+
+        } else {
+            console.log(tab + ' .' + key + '_canvas-' + loop_index_)
+        }
+    }
+
+    function handleSizeSelection(loop_index, response) {
+        $('#item-' + loop_index + ' .size-selects').html(response.data.html);
+        $('#item-' + loop_index + ' .size-selects select').select2({
+            width: 'resolve'
+        });
+        $('#item-' + loop_index + ' .loading_spinner').hide();
+        $('#item-' + loop_index + ' .color-selects').removeClass('visually-hidden');
+        $('#item-' + loop_index + ' .size-selects').removeClass('visually-hidden');
+
+    }
+
+
+
+
+
+    // Event handler for product selection
+    $('.products-select').on('select2:select', function (e) {
+        var loop_index = $('.products-select').index(this) + 1;
+        console.log(loop_index);
+        var data_ = e.params.data;
+        var product_id = data_.id;
+        var mongo_id = $('.print_provider-select').val()
+        handleProductSelection(loop_index, mongo_id, product_id);
+    });
+
+
+
+
+
+    // Handle click event on design images
+    $('.design-image').on('click', function () {
+        // Get the selected image's source
+        var selectedImage = $(this).data('src');
+
+        // Add the 'checked' class to the selected image and remove it from other images
+        $('.design-image').removeClass('checked');
+        $(this).addClass('checked');
+
+        // Display the selected image in the input
+        $('#design-image').val(selectedImage);
+    });
+
+
+
+
+    // Event handler for "Add" button
+    $('.add').on('click', function () {
+        let loop_index = $(this).index('.add');
+        updateQuantity(loop_index, 1); // Increment quantity by 1
+    });
+
+    // Event handler for "Reduce" button
+    $('.reduce').on('click', function () {
+        let loop_index = $(this).index('.reduce');
+        let currentQuantity = parseInt($('.quantity-' + loop_index + ' input').val());
+
+        if (currentQuantity > 1) {
+            updateQuantity(loop_index, -1); // Decrement quantity by 1
+        }
+    });
+
+    // Function to update quantity
+    function updateQuantity(loop_index, change) {
+        let inputField = $('.quantity-' + loop_index + ' input');
+        let currentQuantity = parseInt(inputField.val());
+        let newQuantity = currentQuantity + change;
+
+        if (newQuantity >= 1) {
+            inputField.val(newQuantity);
+        }
+    }
+
+    function process_Canvas(canvas, canvasId, link, canvas_scale, loop_index, querry,remainder_height,remainder_width) {
+        let context = canvas.getContext("2d");
+
+
+        if (!link) {
+            return;
+        }
+
+
+        let startX;
+        let startY;
+        let isMouseDown = false;
+
+        let pi2 = Math.PI * 2;
+        let resizerRadius = 8;
+        let rr = resizerRadius * resizerRadius;
+        let draggingResizer = {
+            x: 0,
+            y: 0
+        };
+        let imgX = 0;
+        let imgY = 0;
+        let flipping = false;
+        let imgWidth, imgHeight, imgRight, imgBottom;
+        let draggingImg = false;
+        let ratio;
+
+        let img = new Image();
+        img.onload = function () {
+            ratio = img.width / img.height;
+            imgWidth = canvas.width;
+            imgHeight = canvas.height;
+            imgRight = imgX + imgWidth;
+            imgBottom = imgY + imgHeight;
+
+            drawCanvas(true, false, true);
+        };
+        img.src = link;
+
+        function drawCanvas(withAnchors, withBorders, withInput) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            if (flipping) {
+                context.translate(imgX + imgWidth, imgY);
+                context.scale(-1, 1);
+                context.drawImage(img, 0, 0, img.width, img.height, 0, 0, imgWidth, imgHeight);
+                // always clean up -- reset transformations to default
+                context.setTransform(1, 0, 0, 1, 0, 0);
+            } else {
+                context.drawImage(img, 0, 0, img.width, img.height, imgX, imgY, imgWidth, imgHeight);
+            }
+
+            if (withInput) {
+
+                $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-x').val(imgX * canvas_scale);
+                $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-y').val(imgY * canvas_scale);
+                $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-w').val(imgWidth * canvas_scale +remainder_width);
+                $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-h').val(imgHeight * canvas_scale +remainder_height);
+            }
+
+            if (withAnchors) {
+                drawDragAnchor(imgX, imgY);
+                drawDragAnchor(imgRight, imgY);
+                drawDragAnchor(imgRight, imgBottom);
+                drawDragAnchor(imgX, imgBottom);
+            }
+
+            if (withBorders) {
+                context.beginPath();
+                context.moveTo(imgX, imgY);
+                context.lineTo(imgRight, imgY);
+                context.lineTo(imgRight, imgBottom);
+                context.lineTo(imgX, imgBottom);
+                context.closePath();
+                context.stroke();
+            }
+        }
+
+        function drawDragAnchor(x, y) {
+            context.beginPath();
+            context.arc(x, y, resizerRadius, 0, pi2, false);
+            context.closePath();
+            context.fill();
+        }
+
+        function anchorHitTest(x, y) {
+            let dx, dy;
+
+            dx = x - imgX;
+            dy = y - imgY;
+            if (dx * dx + dy * dy <= rr) {
+                return 0;
+            }
+
+            dx = x - imgRight;
+            dy = y - imgY;
+            if (dx * dx + dy * dy <= rr) {
+                return 1;
+            }
+
+            dx = x - imgRight;
+            dy = y - imgBottom;
+            if (dx * dx + dy * dy <= rr) {
+                return 2;
+            }
+
+            dx = x - imgX;
+            dy = y - imgBottom;
+            if (dx * dx + dy * dy <= rr) {
+                return 3;
+            }
+
+            return -1;
+        }
+
+        function hitImage(x, y) {
+            return x > imgX && x < imgX + imgWidth && y > imgY && y < imgY + imgHeight;
+        }
+
+        function handleMouseDown(e) {
+            let rectx = document.querySelector(querry + ' .' + canvasId).getBoundingClientRect().left
+            let recty = document.querySelector(querry + ' .' + canvasId).getBoundingClientRect().top
+            startX = parseInt(e.clientX - rectx);
+            startY = parseInt(e.clientY - recty);
+            draggingResizer = anchorHitTest(startX, startY);
+            draggingImg = draggingResizer < 0 && hitImage(startX, startY);
+
+            // Set cursor styles for draggable elements
+            if (draggingResizer >= 0 || draggingImg) {
+                $('body').css('cursor', 'move');
+                canvas.style.cursor = 'move';
+            }
+        }
+
+        function handleMouseUp(e) {
+            draggingResizer = -1;
+            draggingImg = false;
+            drawCanvas(true, false, true);
+
+            // Reset cursor styles
+            $('body').css('cursor', 'auto');
+            canvas.style.cursor = 'auto';
+        }
+
+        function handleMouseOut(e) {
+            handleMouseUp(e);
+        }
+
+        function handleMouseMove(e) {
+            if (draggingResizer > -1) {
+                let rectx = document.querySelector(querry + ' .' + canvasId).getBoundingClientRect().left
+                let recty = document.querySelector(querry + ' .' + canvasId).getBoundingClientRect().top
+
+                mouseY = parseInt(e.clientY - recty);
+
+                switch (draggingResizer) {
+                    case 0:
+                        imgX = mouseX;
+                        imgWidth = imgRight - mouseX;
+                        imgY = mouseY;
+                        imgHeight = (imgWidth) / ratio;
+                        break;
+                    case 1:
+                        imgY = mouseY;
+                        imgWidth = mouseX - imgX;
+                        imgHeight = (imgWidth) / ratio;
+                        break;
+                    case 2:
+                        imgWidth = mouseX - imgX;
+                        imgHeight = (imgWidth) / ratio;
+                        break;
+                    case 3:
+                        imgX = mouseX;
+                        imgWidth = imgRight - mouseX;
+                        imgHeight = (imgWidth) / ratio;
+                        break;
+                }
+
+                if (imgWidth < 25) {
+                    imgWidth = 25;
+                }
+                if (imgHeight < 25) {
+                    imgHeight = 25;
+                }
+
+                imgRight = imgX + imgWidth;
+                imgBottom = imgY + imgHeight;
+
+                drawCanvas(true, true, true);
+            } else if (draggingImg) {
+                imageClick = false;
+
+                let rectx = document.querySelector(querry + ' .' + canvasId).getBoundingClientRect().left
+                let recty = document.querySelector(querry + ' .' + canvasId).getBoundingClientRect().top
+
+                mouseX = parseInt(e.clientX - rectx);
+                mouseY = parseInt(e.clientY - recty);
+
+                let dx
+                let dy = mouseY - startY;
+                // if (flipping){
+                //     dx = - (mouseX - startX);
+                // }else{
+                dx = mouseX - startX;
+                // }
+                imgX += dx;
+                imgY += dy;
+                imgRight += dx;
+                imgBottom += dy;
+
+                startX = mouseX;
+                startY = mouseY;
+
+                drawCanvas(false, true, true);
+            }
+        }
+
+        $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-x').on('change', function () {
+            imgX = $(this).val() / canvas_scale;
+            imgRight = imgX + imgWidth;
+            drawCanvas(true, true, false);
+        });
+        $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-y').on('change', function () {
+            imgY = $(this).val() / canvas_scale;
+            imgBottom = imgY + imgHeight;
+            drawCanvas(true, true, false);
+        });
+        $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-w').on('change', function () {
+            imgWidth = $(this).val() / canvas_scale;
+            imgHeight = imgWidth / ratio;
+            imgRight = imgX + imgWidth;
+            imgBottom = imgY + imgHeight;
+            drawCanvas(true, true, true);
+        });
+        $(querry + ' ' + "#" + canvasId + '-' + loop_index + '-img-h').on('change', function () {
+            imgHeight = $(this).val() / canvas_scale;
+            imgWidth = imgHeight * ratio;
+            imgRight = imgX + imgWidth;
+            imgBottom = imgY + imgHeight;
+            drawCanvas(true, true, true);
+        });
+        $(querry + ' .horizontal-left').on('click', function () {
+            imgX = 0;
+            imgRight = imgX + imgWidth;
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .horizontal-center').on('click', function () {
+            imgX = (canvas.width - imgWidth) / 2;
+            imgRight = imgX + imgWidth;
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .horizontal-right').on('click', function () {
+            imgX = canvas.width - imgWidth;
+            imgRight = imgX + imgWidth;
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .vertical-top').on('click', function () {
+            imgY = 0;
+            imgBottom = imgY + imgHeight;
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .vertical-center').on('click', function () {
+            imgY = (canvas.height - imgHeight) / 2;
+            imgBottom = imgY + imgHeight;
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .vertical-bottom').on('click', function () {
+            imgY = canvas.height - imgHeight;
+            imgBottom = imgY + imgHeight;
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .flip_design').on('click', function () {
+            flipping = !flipping;
+            $(querry + " ." + canvasId + "_flipping").val(flipping.toString());
+            drawCanvas(true, false, true);
+        });
+        $(querry + ' .' + canvasId).mousedown(function (e) {
+            handleMouseDown(e);
+        });
+
+        $(querry + ' .' + canvasId).mousemove(function (e) {
+            handleMouseMove(e);
+        });
+
+        $(querry + ' .' + canvasId).mouseup(function (e) {
+            handleMouseUp(e);
+        });
+
+        $(querry + ' .' + canvasId).mouseout(function (e) {
+            handleMouseOut(e);
+        });
+    }
+
+    const previewTemplate = `<div class="dz-preview dz-file-preview">
+        <div class="dz-details">
+            <div class="dz-thumbnail">
+                <img data-dz-thumbnail>
+                <span class="dz-nopreview">No preview</span>
+                <div class="dz-success-mark"></div>
+                <div class="dz-error-mark"></div>
+                <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                <div class="progress">
+                <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-dz-uploadprogress></div>
+                </div>
+            </div>
+            <div class="dz-filename" data-dz-name></div>
+            <div class="dz-size" data-dz-size></div>
+            </div>
+        </div>`;
+
+
+    const dropzoneMulti = document.querySelector('#dropzone-multi');
+    if (dropzoneMulti) {
+        const myDropzoneMulti = new Dropzone(dropzoneMulti, {
+            url: '/dummy-url', // Set a dummy URL to prevent Dropzone from handling the upload
+            previewTemplate: previewTemplate,
+            parallelUploads: 1,
+            maxFilesize: 70,
+            addRemoveLinks: true
+        });
+
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.addEventListener('click', function () {
+            const files = myDropzoneMulti.files;
+            if (files.length > 0) {
+                handleFormSubmit(files);
+            } else {
+                console.log('No files selected.');
+            }
+        });
+    };
+    function handleFormSubmit(files) {
+        const formData = new FormData();
+        let loop_index = $('#uploadDesign .upload-loop-index').val();
+        query_order = '.data-order-' + loop_index
+        const order_id = document.querySelector(query_order + ' #order_id').value;
+        const product_id = document.querySelector(query_order + ' #product_id').value;
+        const line_item_id = document.querySelector(query_order + ' #line_item_id').value;
+        const shop = document.querySelector(query_order + ' #shop').value;
+        const seller = document.querySelector(query_order + ' #seller').value;
+        const order_date = document.querySelector(query_order + ' #order_date').value;
+        formData.append('order_id', order_id);
+        formData.append('product_id', product_id);
+        formData.append('line_item_id', line_item_id);
+        formData.append('shop', shop);
+        formData.append('seller', seller);
+        formData.append('order_date', order_date);
+
+        // Append each file to the formData
+        files.forEach((file, index) => {
+            formData.append(`file_${index}`, file);
+        });
+
+        const apiEndpoint = '/api/upload_order_design_ff_ngoai';
+
+        fetch(apiEndpoint, {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                // Hide the modal popup
+                // alert(data.message);
+                let links = data.link_folder
+                let design_list = document.querySelector('#design-modal-' + loop_index + ' .design-options')
+                for (let link of links) {
+                    let img = document.createElement('img')
+                    img.src = link
+                    img.setAttribute("style", "cursor: pointer;");
+                    img.setAttribute("data-src", link);
+                    img.className = 'design-image custom-option col-6'
+                    design_list.appendChild(img)
+                }
+                $('.design-image').on('click', function () {
+                    // Lấy đường dẫn của ảnh được chọn
+                    var selectedImage = $(this).data('src');
+
+                    // Thêm class checked vào ảnh được chọn và bỏ class checked của các ảnh khác
+                    $('.design-image').removeClass('checked');
+                    $(this).addClass('checked');
+
+                    // Hiển thị ảnh được chọn trong input
+                    $('#design-image').val(selectedImage);
+                });
+                // $('#design-modal .design-options').appendChild(node)
+                $('#design-modal-' + loop_index).modal('show');
+                $('#uploadDesign').modal('hide');
+                // Refresh the page
+                // location.reload();
+            })
+            .catch((error) => {
+                // Handle errors here
+                alert(error);
+            });
+    };
+</script>
+
+{% endblock %}

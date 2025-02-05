@@ -1,0 +1,160 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/dropzone.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Products/</span> Add product</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Add product</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label" for="name">Product name *</label>
+                            <input type="text" class="form-control" name="name" id="name" placeholder="Product name"
+                                required>
+                            <div data-lastpass-icon-root="true"
+                                style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="sku">Sku *</label>
+                                <input type="text" class="form-control" name="sku" id="sku" placeholder="Product sku"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="xuong">Xuong</label>
+                                <select class="form-control" name="xuong" id="xuong">
+                                    {% for factory in data.factories %}
+                                    <option value="{{ factory }}">{{ factory }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="base_cost">Base cost ($) *</label>
+                                <input type="number" class="form-control" name="base_cost" id="base_cost" value="0"
+                                    step="0.1" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="quantity">quantity *</label>
+                                <input type="number" class="form-control" name="quantity" id="quantity" value="0"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="type">Product type *</label>
+                                <input type="text" class="form-control" name="type" id="type" placeholder="Product type"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="thuy_cost">Thuy cost ($) *</label>
+                                <input type="number" class="form-control" name="thuy_cost" id="thuy_cost" value="0"
+                                    step="0.1" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="size">Product size *</label>
+                                <input type="text" class="form-control" name="size" id="size" placeholder="Product size"
+                                    required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="box_size">Box size</label>
+                                <input type="text" class="form-control" name="box_size" id="box_size"
+                                    placeholder="Box size">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="width">Product template width *</label>
+                                <input type="number" class="form-control" name="width" id="width"
+                                    placeholder="Product template width" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="height">Product template height *</label>
+                                <input type="number" class="form-control" name="height" id="height"
+                                    placeholder="Product template height" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="img" class="form-label">Product image <small
+                                        style="text-transform: lowercase;">(png, jpg, jpeg)</small></label>
+                                <input class="form-control" type="file" id="img" name="img" accept=".png, .jpg, .jpeg">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="us_shipping_1st">US Shipping 1st ($) *</label>
+                                <input type="number" class="form-control" name="us_shipping_1st" id="us_shipping_1st" value="0" required
+                                    step="0.01">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="us_shipping_additional ">US Shipping additional ($) *</label>
+                                <input type="number" class="form-control" name="us_shipping_additional" id="us_shipping_additional" value="0" required
+                                    step="0.01">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="ww_shipping_1st">WW Shipping 1st ($) *</label>
+                                <input type="number" class="form-control" name="ww_shipping_1st" id="ww_shipping_1st" value="0" required
+                                    step="0.01">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="ww_shipping_additional">WW Shipping additional ($) *</label>
+                                <input type="number" class="form-control" name="ww_shipping_additional" id="ww_shipping_additional" value="0" required
+                                    step="0.01">
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="description">description</label>
+                            <textarea id="description" class="form-control" name="description"
+                                placeholder="Description"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" class="dz-hidden-input" tabindex="-1"
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;">
+    <!--/ Hoverable Table rows -->
+</div>
+{% endblock %}

@@ -1,0 +1,561 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/dropzone/dropzone.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/typeahead-js/typeahead.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/select2/select2.css') }}" />
+
+
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Orders</h4>
+
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="card-header header-elements">
+                <div>
+                    <h5 class="card-title mb-0">Table Orders</h5>
+                </div>
+                <div class="col-md-12 col-12">
+                    <div class="card text-center h-100">
+                        <div class="card-header">
+                            <ul class="nav nav-pills card-header-pills" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-pills-browser" aria-controls="navs-pills-browser"
+                                        aria-selected="true" tabindex="-1">Button</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-pills-os" aria-controls="navs-pills-os"
+                                        aria-selected="false">Filter</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                        data-bs-target="#navs-show-column" aria-controls="navs-show-column"
+                                        aria-selected="false">Show column</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="tab-content pt-0">
+                            <div class="tab-pane fade" id="navs-pills-browser" role="tabpanel">
+                            {% if j2_group_perm('dev,admin,factory', user_data)%}
+                            <button class="btn btn-sm btn-outline-dark" id="kiotviet"><i
+                                class="bx bxs-file-export"></i>KiotViet</button>
+                            {% endif %}
+                            </div>
+                            <div class="tab-pane fade container" id="navs-pills-os" role="tabpanel">
+                                <form action="" method="POST" id="filter-order">
+                                    <input type="hidden" name="team" value="{{data.user.team}}" />
+                                    <div class="row justify-content-md-center">
+                                        <div class="col-md-3">
+                                            <label style="margin-bottom: 6px; margin-top: 2px;"
+                                                for="date-range-picker-2">Date Range Picker</label>
+                                            <span>
+                                                {% if data.date_range %}
+                                                <input type="text" class="form-control" name="date_range"
+                                                    value="{{data.date_range.selected}} " id="date-range-picker-2" />
+                                                {% else %}
+                                                <input type="text" class="form-control" name="date-range"
+                                                    id="date-range-picker-2" />
+                                                {% endif %}
+
+                                            </span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="filter_status">Status</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control chosen-select"
+                                                    name="order_status" id="filter_status" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for status in data.status.options %}
+                                                    {% if status in data.status.selected %}
+                                                    <option value="{{status}}" selected>{{status}}</option>
+                                                    {% else %}
+                                                    <option value="{{status}}">{{status}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <label class="form-label" for="filter_type">Type</label>
+                                            <div>
+                                                <select class="js-example-basic-multiple form-control chosen-select"
+                                                    name="product_type" id="filter_type" multiple="multiple"
+                                                    style="width: 100%">
+                                                    {% for type in data.product_types.options %}
+                                                    {% if type in data.product_types.selected %}
+                                                    <option value="{{type}}" selected>{{type}}</option>
+                                                    {% else %}
+                                                    <option value="{{type}}">{{type}}</option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!-- search input -->
+                                        <div class="col-md-3 mb-2">
+                                            <label class="form-label" for="search_input">Order id</label>
+                                            <div>
+                                                {% if data.search %}
+                                                <input type="text" class="form-control" name="filter_order_id"
+                                                    value="{{data.search}}" id="filter_order_id" />
+                                                {% else %}
+                                                <input type="text" class="form-control" name="filter_order_id"
+                                                    id="filter_order_id" />
+                                                {% endif %}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-md-center">
+                                        <div class="col-md-2 mb-2">
+                                            <button type="submit" class="btn btn-outline-primary"><i class="tf-icons bx bx-search-alt-2"></i>Search</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade active show" id="navs-show-column" role="tabpanel">
+                                <div class="column-filters" data-user="{{data.user.user_id}}">
+                                    {% for column in range(1, 25) %}
+                                    <label>
+                                        {% if column in data.table_column %}
+                                        <input type="checkbox" class="column-toggle" data-column="{{ column }}" checked>
+                                        {% else %}
+                                        <input type="checkbox" class="column-toggle" data-column="{{ column }}">
+                                        {% endif %}
+                                        {% if column == 1 %} Account
+                                        {% elif column == 2 %} Order Date
+                                        {% elif column == 3 %} Order ID
+                                        {% elif column == 4 %} Seller
+                                        {% elif column == 5 %} SKU
+                                        {% elif column == 6 %} Type
+                                        {% elif column == 7 %} Size
+                                        {% elif column == 8 %} Color
+                                        {% elif column == 9 %} Material
+                                        {% elif column == 10 %} No Holder
+                                        {% elif column == 11 %} No Color Kit
+                                        {% elif column == 12 %} Other Options
+                                        {% elif column == 13 %} Personalized
+                                        {% elif column == 14 %} Qty
+                                        {% elif column == 15 %} Link des
+                                        {% elif column == 16 %} Note
+                                        {% elif column == 17 %} Status
+                                        {% elif column == 18 %} Cost
+                                        {% elif column == 19 %} Full Name
+                                        {% elif column == 20 %} Address
+                                        {% elif column == 21 %} Tracking No
+                                        {% elif column == 22 %} Carrier
+                                        {% elif column == 23 %} Dispatch day
+                                        {% elif column == 24 %} Design error
+                                        {% endif %}
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 text-center loading_spinner">
+                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div class="card-datatable text-nowrap">
+                <div class="table-responsive text-nowrap render-results">
+                    <table class="table table-sm table-striped" id="table_products">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="check-all"></th>
+                                <th>Account</th>
+                                <th>Order Date</th>
+                                <th>Order ID</th>
+                                <th>Seller</th>
+                                <th>SKU</th>
+                                <th>Type</th>
+                                <th>Size/Style</th>
+                                <th>Color</th>
+                                <th>Material</th>
+                                <th>No Holder</th>
+                                <th>No Color Kit</th>
+                                <th>Other Options</th>
+                                <th>Personalized</th>
+                                <th>Qty</th>
+                                <th>Link des</th>
+                                <th>Note</th>
+                                <th>Fulfill Status</th>
+                                <th>Cost</th>
+                                <th>Full Name</th>
+                                <th>Address</th>
+                                <th>Tracking No</th>
+                                <th>Carrier</th>
+                                <th>Dispatch day</th>
+                                <th>Design error</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            {% for order in data.orders %}
+                            <tr class="order-row" data-status="{{order.fulfillment_status}}" data-order-id="{{ order.external_id }}"
+                                data-product-id="{{order.product_id}}" data-lineitem-id="{{order.line_item_id}}">
+                                <td><input class="dt-body-center" data-order-id="{{ order.external_id }}"
+                                        data-product-id="{{order.product_id}}" data-item-quantity="{{order.quantity}}" type="checkbox"
+                                        data-lineitem-id="{{order.line_item_id}}" data-order-id="{{order.external_id}}"
+                                        data-customer="{{order.name}}"></td>
+                                <td>
+                                    {% if j2_not_group_perm('factory', user_data) %}
+                                    <small>{{order.sales_account_id}}</small>
+                                    {% else %}
+                                    <small></small>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{order.create_at}}</small></td>
+                                <td>
+                                    <small style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#thumbnailModal_{{loop.index}}">
+                                        {% if order.single == true %}
+                                        {{order.fulfillment_order_id}}
+                                        {% else %}
+                                        <span style="color: #570303;">{{order.fulfillment_order_id}}</span>
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                <td><small>{{order.seller}}</small></td>
+                                <td><small>{{order.sku}}</small></td>
+                                <td><small>{{order.product_type}}</small></td>
+                                {% if j2_not_group_perm('factory', user_data) %}
+                                <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="size" style="cursor: text"><small>{{
+                                        order.size }}</small></td>
+                                <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="color" style="cursor: text"><small>{{
+                                        order.color }}</small></td>
+                                <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="material" style="cursor: text"><small>{{ order.material }}</small></td>
+                                <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="num_holder" style="cursor: text"><small>{{ order.num_holder }}</small></td>
+                                    
+                                {% else %}
+                                <td><small>{{order.size}}</small></td>
+                                <td><small>{{order.color}}</small></td>
+                                <td><small>{{order.material}}</small></td>
+                                <td><small>{{order.num_holder}}</small></td>
+                                {% endif %}
+                                <td><small>{{order.num_color_kit}}</small></td>
+                                <td><small class="other_option" data-toggle="tooltip" data-placement="top"
+                                        title="{{order.other_option}}"><span class="limited-text">{{order.other_option}}</span></small></td>
+                                {% if j2_not_group_perm('factory', user_data) %}
+                                <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="personalization" style="cursor: text"><small class="personalization" data-toggle="tooltip"
+                                        data-placement="top" title="{{order.personalization}}"><span
+                                            class="limited-text">{{order.personalization}}</span></small></td>
+                                {% else %}
+                                <td><small class="personalization" data-toggle="tooltip" data-placement="top"
+                                        title="{{order.personalization}}"><span
+                                            class="limited-text">{{order.personalization}}</span></small></td>
+                                {% endif %}
+                                <td><small>{{order.quantity}}</small></td>
+                                <td>
+                                    <small>
+                                        {% if order.link_des is string and order.link_des != "" %}
+                                        <a href="{{ order.link_des }}" target="_blank">link</a>
+                                        {% elif order.link_des is iterable and order.link_des and
+                                        order.assign_designer.design_checked != true %}
+                                        {% if j2_group_perm('dev,admin,leader designer', user_data) %}
+                                        <button type="button" class="btn btn-sm rounded-pill btn-label-primary check-btn"
+                                            data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                                            data-lineitem-id="{{ order.line_item_id }}" data-link="{{ order.link_des }}"
+                                            data-product-type="{{order.product_type}}">
+                                            Check
+                                        </button>
+                                        {% else %}
+                                        <button type="button" class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                                            data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                                            data-link="{{ order.link_des }}" data-product-type="{{order.product_type}}">
+                                            <i class="tf-icons bx bxs-low-vision"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% elif order.link_des is iterable and order.link_des and
+                                        order.assign_designer.design_checked == true %}
+                                        <button type="button" class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                                            data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                                            data-link="{{ order.link_des }}" data-product-type="{{order.product_type}}">
+                                            <i class="tf-icons bx bx-download"></i>
+                                        </button>
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                                    data-field="note" style="cursor: text"><small class="note" data-toggle="tooltip" data-placement="top"
+                                        title="{{order.note}}"><span class="limited-text">{{order.note}}</span></small></td>
+                                {% if j2_group_perm('factory', user_data) or user_data.team == "da_team" %}
+                                <td>
+                                    <select class="form-select form-select-sm form-select-color status-select"
+                                        data-order-id="{{order.external_id}}" data-product-id="{{order.line_item_id}}"
+                                        data-product-type="{{order.product_type}}">
+                                        <option class="form-control custom-option" value=""></option>
+                                        {% for status in data.status.options %}
+                                        {% if status == order.fulfillment_status %}
+                                        <option class="form-control custom-option" value="{{status}}" selected>
+                                            {{status}}
+                                        </option>
+                                        {% else %}
+                                        <option class="form-control custom-option {{status | replace(' ', '-') | lower }}"
+                                            value="{{status}}">{{status}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                {% else %}
+                                <td><small>{{order.fulfillment_status}}</small></td>
+                                {% endif %}
+                                <td><small>{{order.base_cost}}</small></td>
+                                <td><small>{{order.delivery_info.name}}</small></td>
+                                <td><small>{{order.delivery_info.address1}}, {{order.delivery_info.city}},
+                                        {{order.delivery_info.state}} {{order.delivery_info.zip}},
+                                        {{order.delivery_info.country}}</small></td>
+                                <td><small>{{order.tracking_number}}</small></td>
+                                <td><small>{{order.tracking_company}}</small></td>
+                                {% if j2_group_perm('factory', user_data) %}
+                                <td class="editable-date" data-order-id="{{ order.external_id }}"
+                                    data-lineitem-id="{{ order.line_item_id }}" data-field="dispatch_day">
+                                    {% if order.dispatch_day != "" %}
+                                    <input type="text" class="form-control-sm bs-rangepicker-single"
+                                        value="{{ order.dispatch_day }}" />
+                                    {% else %}
+                                    <input type="text" class="form-control-sm bs-rangepicker-single"
+                                        placeholder="DD/MM/YYYY" />
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small style="color: #930e0e;"><b>{{order.design_note}}</b></small>
+                                </td>
+                                {% else %}
+                                <td><small>{{order.dispatch_day}}</small></td>
+                                <td><small>{{order.design_note}}</small></td>
+                                {% endif %}
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i
+                                                class="bx bx-dots-vertical-rounded"></i></button>
+                                        <div class="dropdown-menu">
+                                            {% if j2_not_group_perm('factory', user_data) %}
+                                            <a class="dropdown-item"
+                                                href="/edit_order?external_id={{order.external_id}}&line_item_id={{order.line_item_id}}"><i
+                                                    class="bx bx-edit-alt me-1"></i> Edit order</a>
+                                            <a class="dropdown-item" href="/edit_address?external_id={{order.external_id}}"><i
+                                                    class="bx bx-edit-alt me-1"></i> Edit address</a>
+                                            {% endif %}
+                                            <a class="dropdown-item order-history" href="#"
+                                                data-order-id="{{order.external_id}}"
+                                                data-lineitem-id="{{order.line_item_id}}"><i class='bx bx-history'></i>
+                                                History</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <div class="modal fade" id="thumbnailModal_{{loop.index}}" tabindex="-1"
+                                    style="display: none;" aria-hidden="true">
+                                    <div
+                                        class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                                        <div class="modal-content p-3 p-md-5">
+                                            <div class="modal-body">
+                                                <!-- Display the image at full size -->
+                                                <div class="col-12">
+                                                    <div class="card">
+                                                        <img class="modal-image" src="{{order.thumbnail}}"
+                                                            style="max-width: 100%; height: auto;" alt="Card image cap">
+                                                    </div>
+                                                </div>
+                                                <!-- Multi  -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- pagination -->
+                    <div class="row mt-3">
+                        <div class="col text-center">
+                            <!-- Basic Square Pagination -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-round pagination-primary justify-content-center">
+                                    <li class="page-item first">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                            href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-left"></i></a>
+                                    </li>
+                                    {% if data.page_navi.total_page > 5 %}
+                                    <li class="page-item prev">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                            href="javascript:void(0);"><i class="tf-icon bx bx-chevron-left"></i></a>
+                                    </li>
+                                    {% for page in range(data.page_navi.start_page, data.page_navi.end_page + 1) %}
+                                    <li class="page-item{% if page == data.page_navi.page_number %} active{% endif %}">
+                                        <a class="page-link" href="{{ data.page_navi.route_name }}?page={{ page }}">{{
+                                            page }}</a>
+                                    </li>
+                                    {% endfor %}
+
+                                    <li class="page-item next">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                            href="javascript:void(0);"><i class="tf-icon bx bx-chevron-right"></i></a>
+                                    </li>
+                                    {% else %}
+                                    {% for page in range(1, data.page_navi.total_page + 1) %}
+                                    <li class="page-item{% if page == data.page_navi.page_number %} active{% endif %}">
+                                        <a class="page-link" href="{{ data.page_navi.route_name }}?page={{ page }}">{{
+                                            page }}</a>
+                                    </li>
+                                    {% endfor %}
+                                    {% endif %}
+                                    <li class="page-item last">
+                                        <a class="page-link" data-total-page="{{data.page_navi.total_page}}"
+                                            href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-right"></i></a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            <!--/ Basic Square Pagination -->
+                        </div>
+                    </div>
+                    <script>
+                        $(document).ready(function () {
+                            // Lắng nghe sự kiện click trên các liên kết phân trang
+                            $(".page-link").on("click", function (e) {
+                                e.preventDefault();
+                                const page = $(this).attr("href").split("=")[1]; // Lấy giá trị page từ href
+
+                                // Lấy URL hiện tại
+                                let url = new URL(window.location.href);
+
+                                // Thêm/sửa tham số page
+                                url.searchParams.set("page", page);
+
+                                console.log(url.toString());
+
+                                // Chuyển đến liên kết mới
+                                window.location.href = url.toString();
+                            });
+
+                            // Lắng nghe sự kiện click trên các nút "Next", "Prev", "First", "Last"
+                            $(".page-item.next a, .page-item.prev a, .page-item.first a, .page-item.last a").on("click", function (e) {
+                                e.preventDefault();
+
+                                // Lấy tham số page hiện tại
+                                const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+
+                                // Lấy số trang cuối cùng từ thuộc tính data-total-page
+                                const totalPage = parseInt($(this).data("total-page"));
+
+                                // Thay đổi tham số page tương ứng với nút được nhấp vào
+                                if ($(this).parent().hasClass("next")) {
+                                    const newPage = currentPage + 1;
+                                    changePage(newPage);
+                                } else if ($(this).parent().hasClass("prev")) {
+                                    if (currentPage > 1) {
+                                        const newPage = currentPage - 1;
+                                        changePage(newPage);
+                                    }
+                                } else if ($(this).parent().hasClass("first")) {
+                                    changePage(1);
+                                } else if ($(this).parent().hasClass("last")) {
+                                    changePage(totalPage);
+                                }
+                            });
+
+                            // Hàm thay đổi tham số page và chuyển đến liên kết mới
+                            function changePage(newPage) {
+                                let url = new URL(window.location.href);
+                                url.searchParams.set("page", newPage);
+                                window.location.href = url.toString();
+                            }
+
+                            // Ẩn hoặc vô hiệu hóa nút "Prev" khi page = 1
+                            const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+                            if (currentPage === 1) {
+                                $(".page-item.prev").addClass("disabled");
+                            }
+
+                            // Ẩn hoặc vô hiệu hóa nút "Next" khi page = last
+                            const totalPage = parseInt($(".page-item.last a").data("total-page"));
+                            if (currentPage === totalPage) {
+                                $(".page-item.next").addClass("disabled");
+                            }
+                        });
+
+                    </script>
+                    <!--/ pagination -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal history -->
+<div class="modal fade" id="historyModal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+                <ul class="timeline">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="linkDesModal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <!-- Images -->
+                <div class="rounded-top">
+                    <div class="row mx-0 gy-3">
+                        <!-- Các hình ảnh sẽ được thêm vào đây bằng mã JavaScript -->
+                    </div>
+                </div>
+                <!--/ Images  -->
+                <!-- btn -->
+            </div>
+        </div>
+    </div>
+</div>
+ <!-- modal noteModal -->
+ <div class="modal fade" id="noteModal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <form>
+                    <!-- Images -->
+                    <div class="mb-3">
+                        <label class="form-label" for="noteInput">Note</label>
+                        <textarea id="noteInput" class="form-control"
+                            placeholder="Note..."></textarea>
+                    </div>
+                    <!-- btn submit -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary" id="submitNote">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/typeahead-js/typeahead.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/select2/select2.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/orders.js') }}" defer></script>
+{% endblock %}

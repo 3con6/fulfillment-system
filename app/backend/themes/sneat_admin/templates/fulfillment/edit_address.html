@@ -1,0 +1,78 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/dropzone.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Orders/</span> Edit Order</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Edit Order</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" class="form-control" name="_id" id="_id" value="{{ data.order._id }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="order_id">Order ID *</label>
+                                <input type="text" class="form-control" name="order_id" id="order_id"
+                                    value="{{ data.order._original_data.order_id }}" required>
+                                <div data-lastpass-icon-root="true"
+                                    style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                              <label class="form-label" for="collapsible-fullname">Full Name</label>
+                              <input type="text" id="collapsible-fullname" name="fullname" class="form-control" value="{{ data.order._original_data.delivery_info.name }}">
+                            <div data-lastpass-icon-root="true" style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;"></div></div>
+                            <div class="col-md-6">
+                              <label class="form-label" for="collapsible-phone">Phone No</label>
+                              <input type="text" id="collapsible-phone" name="phone" class="form-control phone-mask" value="{{ data.order._original_data.delivery_info.phone }}" aria-label="{{ data.order._original_data.delivery_info.phone }}">
+                            </div>
+                            <div class="col-6">
+                              <label class="form-label" for="collapsible-address1">Address1</label>
+                              <input type="text" id="collapsible-address1" name="address1" class="form-control" value="{{ data.order._original_data.delivery_info.address1 }}">
+                            </div>
+                            <div class="col-6">
+                              <label class="form-label" for="collapsible-address2">Address2</label>
+                              <input type="text" id="collapsible-address2" name="address2" class="form-control" value="{{ data.order._original_data.delivery_info.address2 }}">
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label" for="collapsible-city">City</label>
+                              <input type="text" id="collapsible-city" name="city" class="form-control" value="{{ data.order._original_data.delivery_info.city }}">
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label" for="collapsible-state">State</label>
+                              <input type="text" id="collapsible-state" name="state" class="form-control" value="{{ data.order._original_data.delivery_info.state }}">
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label" for="collapsible-zipcode">Zipcode</label>
+                              <input type="text" id="collapsible-zipcode" name="zipcode" class="form-control" value="{{ data.order._original_data.delivery_info.zip }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="collapsible-country">Country</label>
+                                <input type="text" id="collapsible-country" name="country" class="form-control" value="{{ data.order._original_data.delivery_info.country }}">
+                              </div>
+                          </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" class="dz-hidden-input" tabindex="-1"
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;">
+    <!--/ Hoverable Table rows -->
+</div>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Products</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <h5 class="card-header">Table Products <a class="btn btn-primary" href="/ff_add_product" role="button"
+                    style="float: right;">Add Product</a></h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table" id="table_products">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Sku</th>
+                            <th>Size/Style</th>
+                            <th>Product type</th>
+                            <th>Xuong</th>
+                            <th>Product template</th>
+                            <th>Base cost</th>
+                            <th>Thuy cost</th>
+                            <th>US Shipping 1st</th>
+                            <th>US Shipping additional</th>
+                            <th>WW Shipping 1st</th>
+                            <th>WW Shipping additional</th>
+                            <th>Quantity</th>
+                            <th>Description</th>
+                            <th>Box size</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for product in data.products %}
+                        <tr>
+                            <td><small>{{ loop.index }}</small></td>
+                            <td><small>{{ product.name }}</small></td>
+                            <td><small>{{ product.sku }}</small></td>
+                            <td><small>{{ product.product_size }}</small></td>
+                            <td><small>{{ product.product_type }}</small></td>
+                            <td><small>{{ product.xuong }}</small></td>
+                            <td><small>{{ product.product_template_width }}x{{ product.product_template_height }}
+                                    inch</small></td>
+                            <td><small style="color: red;"><b>{{ product.base_cost }}</b></small></td>
+                            <td><small style="color: rgb(143, 42, 42);"><b>{{ product.thuy_cost }}</b></small></td>
+                            <td><small class="text-info"><b>{{ product.us_shipping_1st }}</b></small></td>
+                            <td><small class="text-info"><b>{{ product.us_shipping_additional  }}</b></small></td>
+                            <td><small class="text-primary"><b>{{ product.ww_shipping_1st }}</b></small></td>
+                            <td><small class="text-primary"><b>{{ product.ww_shipping_additional }}</b></small></td>
+                            <td class="editable" data-id="{{ product._id }}"><small>{{ product.quantity }}</small></td>
+                            <td><small>{{ product.description }}</small></td>
+                            <td><small>{{ product.box_size }}</small></td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                        data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item"
+                                            href="/ff_edit_product?id={{product._id}}&type=fulfillment"><i
+                                                class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <a class="dropdown-item delete-product" data-id="{{ product._id }}"
+                                            href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--/ Hoverable Table rows -->
+</div>
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#table_products').DataTable({
+            "aLengthMenu": [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            "iDisplayLength": -1,
+            columnDefs: [
+                { targets: '_all', width: '50px' } // Đặt độ rộng tối đa của mỗi cột là 50px
+            ],
+        });
+
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+
+        $('#table_products').on('click', '.editable', function () {
+            $(this).attr('contentEditable', true);
+        });
+
+
+        $('#table_products').on('blur', '.editable', function () {
+            var newValue = $(this).text();
+            var rowId = $(this).attr('data-id');
+            $.ajax({
+                url: '/api/change_product_quantity',
+                type: 'POST',
+                data: JSON.stringify({
+                    id: rowId,
+                    quantity: newValue,
+                    type: 'fulfillment'
+                }),
+                success: function (response) {
+                    console.log(response.message)
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-product', function () {
+            var id = $(this).data('id');
+            if (confirm('Are you sure?')) {
+                $.ajax({
+                    url: '/api/delete_product',
+                    type: 'POST',
+                    data: JSON.stringify({ id: id, type: 'ff_product' }),
+                    success: function (result) {
+                        alert('Product deleted successfully');
+                        window.location.reload();
+                    },
+                    error: function (err) {
+                        alert('Error deleting product');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

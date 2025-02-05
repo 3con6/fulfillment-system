@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block content%}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Shop/</span> Edit Shop</h4>
+    <!-- Hoverable Table rows -->
+    <div class="row light-style">
+        <div class="col-xl">
+            <div class="card mb-12">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Edit shop</h5>
+                </div>
+                <div class="card-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" class="form-control" name="_id" id="_id" value="{{ data.shop._id }}">
+                        <div class="row">
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label" for="shop">Shop *</label>
+                                <input type="text" class="form-control" name="shop" id="shop" value="{{data.shop.shop}}" required>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label" for="seller_id">Seller ID</label>
+                                <input class="form-control" type="text" name="seller_id" id="seller_id" value="{{data.shop.seller_id}}">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label" for="seller_name">Seller Name</label>
+                                <input class="form-control" type="text" name="seller_name" id="seller_name" value="{{data.shop.seller_name}}">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label" for="proxy">proxy</label>
+                                <input class="form-control" type="text" name="proxy" id="proxy" value="{{data.shop.proxy}}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="team">Team *</label>
+                                <select class="form-select"  name="team" required>
+                                    <option></option>
+                                    <option value="Vi" {% if data.shop.team == 'Vi'%} selected {% endif %}>Vi</option>
+                                    <option value="Tùng" {% if data.shop.team == 'Tùng'%} selected {% endif %}>Tùng</option>
+                                    <option value="Thuận" {% if data.shop.team == 'Thuận'%} selected {% endif %}>Thuận</option>
+                                    <option value="Trung" {% if data.shop.team == 'Trung'%} selected {% endif %}>Trung</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Hoverable Table rows -->
+</div>
+
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/datatable-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/magnific-popup/magnific-popup.min.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedcolumn/datatable-fixedcolumn.css') }}" />
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Teams</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <h5 class="card-header">Table Teams <a class="btn btn-primary" href="/add_team" role="button"
+                    style="float: right;">Add team</a></h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table" id="table_products">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Users</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for team in data.teams %}
+                        <tr>
+                            <td><small>{{ loop.index }}</small></td>
+                            <td><small>{{ team.name }}</small></td>
+                            <td>
+                                <small>
+                                    {% for user in team.users %}
+                                    {{ user.username }}{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </small>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                        data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/edit_team?id={{team._id}}"><i
+                                                class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <a class="dropdown-item delete-team" data-id="{{ team._id }}"
+                                            href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--/ Hoverable Table rows -->
+</div>
+<script src="{{ url_for('auth_static',path='libs/datatable-bs5/datatables-bootstrap5.js') }}"></script>
+<script src="{{ url_for('auth_static',path='libs/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('auth_static',path='js/tables-datatables-extensions.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#table_products').DataTable({
+            "aLengthMenu": [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            "iDisplayLength": -1,
+        });
+
+        $('.popup_img').magnificPopup({
+            type: 'image'
+        });
+
+        $('#table_products').on('click', '.editable', function () {
+            $(this).attr('contentEditable', true);
+        });
+
+
+        $('#table_products').on('blur', '.editable', function () {
+            var newValue = $(this).text();
+            var rowId = $(this).attr('data-id');
+            $.ajax({
+                url: '/api/change_product_quantity',
+                type: 'POST',
+                data: JSON.stringify({
+                    id: rowId,
+                    quantity: newValue,
+                    type: 'fulfillment'
+                }),
+                success: function (response) {
+                    console.log(response.message)
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-team', function () {
+            var id = $(this).data('id');
+            if (confirm('Are you sure?')) {
+                $.ajax({
+                    url: '/api/delete_team',
+                    type: 'POST',
+                    data: JSON.stringify({ id: id }),
+                    success: function (result) {
+                        alert('Deleted team successfully');
+                        window.location.reload();
+                    },
+                    error: function (err) {
+                        alert('Error deleting team');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

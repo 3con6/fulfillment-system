@@ -1,0 +1,187 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.css') }}" />
+
+
+<style>
+    /* Icon set - http://ionicons.com/ */
+    @import url(https://fonts.googleapis.com/css?family=Raleway:400);
+    @import url(https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css);
+
+    figure.snip1193 {
+        font-family: 'Raleway', Arial, sans-serif;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin: 10px;
+        min-width: 220px;
+        max-width: 310px;
+        max-height: 310px;
+        width: 100%;
+        background: #ffffff;
+        text-align: center;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+    }
+
+    figure.snip1193 * {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-transition: all 0.6s ease;
+        transition: all 0.6s ease;
+    }
+
+    figure.snip1193 img {
+        opacity: 1;
+        width: 100%;
+        display: block;
+    }
+
+    figure.snip1193 figcaption {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 10px 12px 5px;
+        position: absolute;
+    }
+
+    figure.snip1193 h4,
+    figure.snip1193 i {
+        color: #696cff;
+    }
+
+    figure.snip1193 h4 {
+        font-weight: 400;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    figure.snip1193 i {
+        font-size: 22px;
+    }
+
+    figure.snip1193 a {
+        text-decoration: none;
+    }
+
+    figure.snip1193 .bottom-left,
+    figure.snip1193 .bottom-right {
+        position: absolute;
+        bottom: 5px;
+        opacity: 0;
+    }
+
+    figure.snip1193 .bottom-left {
+        left: 5px;
+        -webkit-transform: translate(-50%, 50%);
+        transform: translate(-50%, 50%);
+    }
+
+    figure.snip1193 .bottom-right {
+        right: 5px;
+        -webkit-transform: translate(50%, 50%);
+        transform: translate(50%, 50%);
+    }
+
+    figure.snip1193:hover img,
+    figure.snip1193.hover img {
+        opacity: 0.3;
+        -webkit-transform: scale(1.1);
+        transform: scale(1.1);
+    }
+
+    figure.snip1193:hover figcaption .bottom-left,
+    figure.snip1193.hover figcaption .bottom-left,
+    figure.snip1193:hover figcaption .bottom-right,
+    figure.snip1193.hover figcaption .bottom-right {
+        -webkit-transform: translate(0, 0);
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        right: 15px;
+        border: 3px solid #f1f1f1;
+        z-index: 9;
+    }
+</style>
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="row row-bordered g-0">
+                <div class="card-header row">
+                    <h5 class="card-title mb-0">Clipart</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap mx-auto">
+                        {% for psd in data.psds %}
+                        <figure class="snip1193">
+                            <img src="{{psd.psd.canvas_link}}" alt="sample31" />
+                            <figcaption>
+                                <h4>{{psd.file_name}}</h4>
+                                <a href="#" class="bottom-left btn-download-psd" data-mongo-id="{{psd._id}}"><i
+                                        class="ion-ios-cloud-download"></i></a><a
+                                    href="/process_pdf?mongo_id={{psd._id}}" class="bottom-middle btn-updload-pts"><i
+                                        class='bx bxs-file-pdf'></i>
+                                </a>
+                                <a href="/customize_design?_id={{psd._id}}" class="bottom-right"><i
+                                        class='bx bxs-customize'></i></a>
+                            </figcaption>
+                        </figure>
+                        {% endfor %}
+
+                    </div>
+                </div>
+                <div class="modal" tabindex="-1" role="dialog" id="spinnerModal">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body text-center">
+                                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const spinnerModal = document.getElementById('spinnerModal');
+    $(document).ready(function () {
+        $('.btn-download-psd').click(function (e) {
+            e.preventDefault();
+            var mongo_id = $(this).data('mongo-id');
+            spinnerModal.style.display = 'block';
+            document.body.classList.add('modal-open');
+            $.ajax({
+                type: "GET",
+                url: "https://personalize-api.nambe.net/api/download_psd?mongo_id=" + mongo_id,
+                success: function (response) {
+                    let my_uint8_array = Uint8Array.from(response, c => c.charCodeAt(0));
+                    const blob = new Blob([my_uint8_array], { type: "application/psd" });
+                    spinnerModal.style.display = 'none';
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = "file.psd";
+                    link.click();
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

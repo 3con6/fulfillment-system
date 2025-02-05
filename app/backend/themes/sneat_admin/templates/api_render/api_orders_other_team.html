@@ -1,0 +1,318 @@
+{% set user_data = request.state.user_data %}
+<table class="table table-sm table-striped" id="table_products_api">
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="check-all"></th>
+            <th>Account</th>
+            <th>Order Date</th>
+            <th>Order ID</th>
+            <th>Seller</th>
+            <th>SKU</th>
+            <th>Type</th>
+            <th>Size/Style</th>
+            <th>Color</th>
+            <th>Material</th>
+            <th>No Holder</th>
+            <th>No Color Kit</th>
+            <th>Other Options</th>
+            <th>Personalized</th>
+            <th>Qty</th>
+            <th>Link des</th>
+            <th>Note</th>
+            <th>Fulfill Status</th>
+            <th>Cost</th>
+            <th>Full Name</th>
+            <th>Address</th>
+            <th>Tracking No</th>
+            <th>Carrier</th>
+            <th>Dispatch day</th>
+            <th>Design error</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="table-border-bottom-0">
+        {% for order in context.orders %}
+        <tr class="order-row" data-status="{{order.fulfillment_status}}" data-order-id="{{ order.external_id }}"
+            data-product-id="{{order.product_id}}" data-lineitem-id="{{order.line_item_id}}">
+            <td><input class="dt-body-center" data-order-id="{{ order.external_id }}"
+                    data-product-id="{{order.product_id}}" data-item-quantity="{{order.quantity}}" type="checkbox"
+                    data-lineitem-id="{{order.line_item_id}}" data-order-id="{{order.external_id}}"
+                    data-customer="{{order.name}}"></td>
+            <td>
+                {% if j2_not_group_perm('factory', user_data) %}
+                <small>{{order.sales_account_id}}</small>
+                {% else %}
+                <small></small>
+                {% endif %}
+            </td>
+            <td><small>{{order.create_at}}</small></td>
+            <td>
+                <small style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#thumbnailModal_{{loop.index}}">
+                    {% if order.single == true %}
+                    {{order.fulfillment_order_id}}
+                    {% else %}
+                    <span style="color: #570303;">{{order.fulfillment_order_id}}</span>
+                    {% endif %}
+                </small>
+            </td>
+            <td><small>{{order.seller}}</small></td>
+            <td><small>{{order.sku}}</small></td>
+            <td><small>{{order.product_type}}</small></td>
+            {% if j2_not_group_perm('factory', user_data) %}
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="size" style="cursor: text"><small>{{
+                    order.size }}</small></td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="color" style="cursor: text"><small>{{
+                    order.color }}</small></td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="material" style="cursor: text"><small>{{ order.material }}</small></td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="num_holder" style="cursor: text"><small>{{ order.num_holder }}</small></td>
+
+            {% else %}
+            <td><small>{{order.size}}</small></td>
+            <td><small>{{order.color}}</small></td>
+            <td><small>{{order.material}}</small></td>
+            <td><small>{{order.num_holder}}</small></td>
+            {% endif %}
+            <td><small>{{order.num_color_kit}}</small></td>
+            <td><small class="other_option" data-toggle="tooltip" data-placement="top"
+                    title="{{order.other_option}}"><span class="limited-text">{{order.other_option}}</span></small></td>
+            {% if j2_not_group_perm('factory', user_data) %}
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="personalization" style="cursor: text"><small class="personalization" data-toggle="tooltip"
+                    data-placement="top" title="{{order.personalization}}"><span
+                        class="limited-text">{{order.personalization}}</span></small></td>
+            {% else %}
+            <td><small class="personalization" data-toggle="tooltip" data-placement="top"
+                    title="{{order.personalization}}"><span
+                        class="limited-text">{{order.personalization}}</span></small></td>
+            {% endif %}
+            <td><small>{{order.quantity}}</small></td>
+            <td>
+                <small>
+                    {% if order.link_des is string and order.link_des != "" %}
+                    <a href="{{ order.link_des }}" target="_blank">link</a>
+                    {% elif order.link_des is iterable and order.link_des and
+                    order.assign_designer.design_checked != true %}
+                    {% if j2_group_perm('dev,admin,leader designer', user_data) %}
+                    <button type="button" class="btn btn-sm rounded-pill btn-label-primary check-btn"
+                        data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                        data-lineitem-id="{{ order.line_item_id }}" data-link="{{ order.link_des }}"
+                        data-product-type="{{order.product_type}}">
+                        Check
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                        data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                        data-link="{{ order.link_des }}" data-product-type="{{order.product_type}}">
+                        <i class="tf-icons bx bxs-low-vision"></i>
+                    </button>
+                    {% endif %}
+                    {% elif order.link_des is iterable and order.link_des and
+                    order.assign_designer.design_checked == true %}
+                    <button type="button" class="btn btn-sm rounded-pill btn-label-primary download-btn"
+                        data-order-id="{{ order.external_id }}" data-product-id="{{ order.product_id }}"
+                        data-link="{{ order.link_des }}" data-product-type="{{order.product_type}}">
+                        <i class="tf-icons bx bx-download"></i>
+                    </button>
+                    {% endif %}
+                </small>
+            </td>
+            <td class="editable" data-order-id="{{ order.external_id }}" data-lineitem-id="{{order.line_item_id}}"
+                data-field="note" style="cursor: text"><small class="note" data-toggle="tooltip" data-placement="top"
+                    title="{{order.note}}"><span class="limited-text">{{order.note}}</span></small></td>
+            {% if j2_group_perm('factory', user_data) or user_data.team == "da_team" %}
+            <td>
+                <select class="form-select form-select-sm form-select-color status-select"
+                    data-order-id="{{order.external_id}}" data-product-id="{{order.line_item_id}}"
+                    data-product-type="{{order.product_type}}">
+                    <option class="form-control custom-option" value=""></option>
+                    {% for status in context.status.options %}
+                    {% if status == order.fulfillment_status %}
+                    <option class="form-control custom-option" value="{{status}}" selected>
+                        {{status}}
+                    </option>
+                    {% else %}
+                    <option class="form-control custom-option {{status | replace(' ', '-') | lower }}"
+                        value="{{status}}">{{status}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </td>
+            {% else %}
+            <td><small>{{order.fulfillment_status}}</small></td>
+            {% endif %}
+            <td><small>{{order.base_cost}}</small></td>
+            <td><small>{{order.delivery_info.name}}</small></td>
+            <td><small>{{order.delivery_info.address1}}, {{order.delivery_info.city}},
+                    {{order.delivery_info.state}} {{order.delivery_info.zip}},
+                    {{order.delivery_info.country}}</small></td>
+            <td><small>{{order.tracking_number}}</small></td>
+            <td><small>{{order.tracking_company}}</small></td>
+            {% if j2_group_perm('factory', user_data) %}
+            <td class="editable-date" data-order-id="{{ order.external_id }}"
+                data-lineitem-id="{{ order.line_item_id }}" data-field="dispatch_day">
+                {% if order.dispatch_day != "" %}
+                <input type="text" class="form-control-sm bs-rangepicker-single" value="{{ order.dispatch_day }}" />
+                {% else %}
+                <input type="text" class="form-control-sm bs-rangepicker-single" placeholder="DD/MM/YYYY" />
+                {% endif %}
+            </td>
+            <td>
+                <small style="color: #930e0e;"><b>{{order.design_note}}</b></small>
+            </td>
+            {% else %}
+            <td><small>{{order.dispatch_day}}</small></td>
+            <td><small>{{order.design_note}}</small></td>
+            {% endif %}
+            <td>
+                <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i
+                            class="bx bx-dots-vertical-rounded"></i></button>
+                    <div class="dropdown-menu">
+                        {% if j2_not_group_perm('factory', user_data) %}
+                        <a class="dropdown-item"
+                            href="/edit_order?external_id={{order.external_id}}&line_item_id={{order.line_item_id}}"><i
+                                class="bx bx-edit-alt me-1"></i> Edit order</a>
+                        <a class="dropdown-item" href="/edit_address?external_id={{order.external_id}}"><i
+                                class="bx bx-edit-alt me-1"></i> Edit address</a>
+                        {% endif %}
+                        <a class="dropdown-item order-history" href="#" data-order-id="{{order.external_id}}"
+                            data-lineitem-id="{{order.line_item_id}}"><i class='bx bx-history'></i>
+                            History</a>
+                    </div>
+                </div>
+            </td>
+            <div class="modal fade" id="thumbnailModal_{{loop.index}}" tabindex="-1" style="display: none;"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                    <div class="modal-content p-3 p-md-5">
+                        <div class="modal-body">
+                            <!-- Display the image at full size -->
+                            <div class="col-12">
+                                <div class="card">
+                                    <img class="modal-image" src="{{order.thumbnail}}"
+                                        style="max-width: 100%; height: auto;" alt="Card image cap">
+                                </div>
+                            </div>
+                            <!-- Multi  -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- pagination -->
+<div class="row mt-3">
+    <div class="col text-center">
+        <!-- Basic Square Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-round pagination-primary justify-content-center">
+                <li class="page-item first">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-left"></i></a>
+                </li>
+                {% if context.page_navi.total_page > 5 %}
+                <li class="page-item prev">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevron-left"></i></a>
+                </li>
+                {% for page in range(context.page_navi.start_page, context.page_navi.end_page + 1) %}
+                <li class="page-item{% if page == context.page_navi.page_number %} active{% endif %}">
+                    <a class="page-link" href="{{ context.page_navi.route_name }}?page={{ page }}">{{
+                        page }}</a>
+                </li>
+                {% endfor %}
+
+                <li class="page-item next">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevron-right"></i></a>
+                </li>
+                {% else %}
+                {% for page in range(1, context.page_navi.total_page + 1) %}
+                <li class="page-item{% if page == context.page_navi.page_number %} active{% endif %}">
+                    <a class="page-link" href="{{ context.page_navi.route_name }}?page={{ page }}">{{
+                        page }}</a>
+                </li>
+                {% endfor %}
+                {% endif %}
+                <li class="page-item last">
+                    <a class="page-link" data-total-page="{{context.page_navi.total_page}}"
+                        href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-right"></i></a>
+                </li>
+            </ul>
+        </nav>
+        <!--/ Basic Square Pagination -->
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        // Lắng nghe sự kiện click trên các liên kết phân trang
+        $(".page-link").on("click", function (e) {
+            e.preventDefault();
+            const page = $(this).attr("href").split("=")[1]; // Lấy giá trị page từ href
+
+            // Lấy URL hiện tại
+            let url = new URL(window.location.href);
+
+            // Thêm/sửa tham số page
+            url.searchParams.set("page", page);
+
+            console.log(url.toString());
+
+            // Chuyển đến liên kết mới
+            window.location.href = url.toString();
+        });
+
+        // Lắng nghe sự kiện click trên các nút "Next", "Prev", "First", "Last"
+        $(".page-item.next a, .page-item.prev a, .page-item.first a, .page-item.last a").on("click", function (e) {
+            e.preventDefault();
+
+            // Lấy tham số page hiện tại
+            const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+
+            // Lấy số trang cuối cùng từ thuộc tính data-total-page
+            const totalPage = parseInt($(this).data("total-page"));
+
+            // Thay đổi tham số page tương ứng với nút được nhấp vào
+            if ($(this).parent().hasClass("next")) {
+                const newPage = currentPage + 1;
+                changePage(newPage);
+            } else if ($(this).parent().hasClass("prev")) {
+                if (currentPage > 1) {
+                    const newPage = currentPage - 1;
+                    changePage(newPage);
+                }
+            } else if ($(this).parent().hasClass("first")) {
+                changePage(1);
+            } else if ($(this).parent().hasClass("last")) {
+                changePage(totalPage);
+            }
+        });
+
+        // Hàm thay đổi tham số page và chuyển đến liên kết mới
+        function changePage(newPage) {
+            let url = new URL(window.location.href);
+            url.searchParams.set("page", newPage);
+            window.location.href = url.toString();
+        }
+
+        // Ẩn hoặc vô hiệu hóa nút "Prev" khi page = 1
+        const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+        if (currentPage === 1) {
+            $(".page-item.prev").addClass("disabled");
+        }
+
+        // Ẩn hoặc vô hiệu hóa nút "Next" khi page = last
+        const totalPage = parseInt($(".page-item.last a").data("total-page"));
+        if (currentPage === totalPage) {
+            $(".page-item.next").addClass("disabled");
+        }
+    });
+</script>
+<!-- end pagination -->

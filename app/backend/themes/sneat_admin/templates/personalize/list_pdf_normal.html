@@ -1,0 +1,296 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.css') }}" />
+
+
+<style>
+    /* Icon set - http://ionicons.com/ */
+    @import url(https://fonts.googleapis.com/css?family=Raleway:400);
+    @import url(https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css);
+
+    figure.snip1193 {
+        font-family: 'Raleway', Arial, sans-serif;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin: 10px;
+        min-width: 220px;
+        max-width: 310px;
+        max-height: 310px;
+        width: 100%;
+        background: #ffffff;
+        text-align: center;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+    }
+
+    figure.snip1193 * {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-transition: all 0.6s ease;
+        transition: all 0.6s ease;
+    }
+
+    figure.snip1193 img {
+        opacity: 1;
+        width: 100%;
+        display: block;
+    }
+
+    figure.snip1193 figcaption {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 10px 12px 5px;
+        position: absolute;
+    }
+
+    figure.snip1193 h4,
+    figure.snip1193 i {
+        color: #696cff;
+    }
+    
+    figure.snip1193 h4 {
+        font-weight: 400;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    figure.snip1193 i {
+        font-size: 22px;
+    }
+
+    figure.snip1193 a {
+        text-decoration: none;
+    }
+
+    figure.snip1193 .bottom-left,
+    figure.snip1193 .bottom-right {
+        position: absolute;
+        bottom: 5px;
+        opacity: 0;
+    }
+
+    figure.snip1193 .bottom-left {
+        left: 5px;
+        -webkit-transform: translate(-50%, 50%);
+        transform: translate(-50%, 50%);
+    }
+
+    figure.snip1193 .bottom-right {
+        right: 5px;
+        -webkit-transform: translate(50%, 50%);
+        transform: translate(50%, 50%);
+    }
+
+    figure.snip1193:hover img,
+    figure.snip1193.hover img {
+        opacity: 0.3;
+        -webkit-transform: scale(1.1);
+        transform: scale(1.1);
+    }
+
+    figure.snip1193:hover figcaption .bottom-left,
+    figure.snip1193.hover figcaption .bottom-left,
+    figure.snip1193:hover figcaption .bottom-right,
+    figure.snip1193.hover figcaption .bottom-right {
+        -webkit-transform: translate(0, 0);
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        right: 15px;
+        border: 3px solid #f1f1f1;
+        z-index: 9;
+    }
+
+</style>
+
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="row row-bordered g-0">
+                <div class="card-header row">
+                    <h5 class="col-4 card-title mb-0">PDF Template</h5>
+                    <div class="col-8 justify-content-end text-end">
+                        
+                        <a href="/png2pdf"><span href class="btn btn-primary ">Create Template</span></a>
+                        
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap mx-auto">
+                        {% for pdf in data.pdfs %}
+                            <figure class="snip1193">
+                                <img src="{{pdf.preview}}" alt="sample31"/>
+                                <figcaption>
+                                    <h4>{{pdf.file_name}}</h4>
+                                    <a href="#"  class="bottom-left btn-upload-png" data-mongo-id="{{pdf._id}}"><i class="ion-ios-cloud-download"></i></a>
+                                    </a>
+                                </figcaption>
+                            </figure>
+                        {% endfor %}
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="uploadDesign" tabindex="-1" style="display: none;"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                                <div class="modal-content p-3 p-md-5">
+                                    <div class="modal-body">
+                                        <!-- Multi  -->
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <h5 class="card-header">Multiple</h5>
+                                                <div class="card-body">
+                                                    <!-- <input type="hidden" class="upload-loop-index" value="" /> -->
+                                                    <form method="POST" class="dropzone needsclick" id="ListCustom">
+                                                        <!-- Hidden input fields for order id and product -->
+                                                        <div class="upload-image-form">
+                                                            
+                                                        </div>
+                                                        <div class="text-center mt-3">
+                                                            <button type="button" class="btn btn-primary"
+                                                                id="uploadBtn">Upload</button>
+                                                            <button type="button" class="btn btn-outline-secondary"
+                                                                data-bs-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Multi  -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="spinnerModal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border spinner-border-lg text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<script>
+    const toBase64 = async (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+        });
+    };
+
+    async function handleFormSubmit(object_form){
+        let fields = Object.keys(object_form);
+        fields = fields.filter(field => field != 'tolerance');
+        let links = await Promise.all(fields.map(async name => {
+            const base64 = await toBase64(object_form[name]);
+            return { name, base64 };
+        }));
+        return links;
+    };
+
+    const spinnerModal = document.getElementById('spinnerModal');
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.addEventListener('click', function () {
+        var formEl = document.forms.ListCustom;
+        var formData = new FormData(formEl);
+        let object_form = Object.fromEntries(formData);
+        let tolerance = object_form.tolerance;
+        spinnerModal.style.display = 'block';
+        handleFormSubmit(object_form).then((links) => {
+            var result = {
+                    'links': links,
+                    'mongo_id': $('#uploadBtn').data('mongo-id'),
+                    'tolerance': parseFloat(tolerance)
+            }
+            $.ajax({
+                url: 'https://personalize-api.nambe.net/api/png2pdf',
+                type: 'POST',
+                data: result,
+                success: function (res) {
+                    let my_uint8_array = Uint8Array.from(res, c => c.charCodeAt(0));
+                    const blob = new Blob([my_uint8_array], { type: "application/pdf" });
+                    // Create a temporary link to trigger the download
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    spinnerModal.style.display = 'none';
+                    link.href = url;
+                    link.setAttribute('download', res.name);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    $('#uploadDesign').modal('hide');
+                },
+                error: function (error) {
+                    alert('Error occured while uploading files');
+                    console.log(error);
+                    spinnerModal.style.display = 'none';
+                }
+            });
+        });
+    });
+    var data_pdf = {{data.pdfs|tojson}};
+    $('.btn-upload-png').on('click', function () {
+        // $('#uploadBtn').data('mongo-id',$(this).data('mongo-id'));
+        const upload_image_form = document.querySelector('.upload-image-form');
+        const mongo_id = $(this).data('mongo-id');
+        $('#uploadBtn').data('mongo-id',mongo_id);
+        const pdf = data_pdf.find(pdf => pdf._id == mongo_id);
+        const customs = pdf.pdf.custom;
+        const tolerance = pdf.pdf.tolerance;
+        list_append = document.createElement('div');
+        customs.forEach(custom => {
+            if (custom.name1){
+                let label = document.createElement('label');
+                label.setAttribute('for', custom.name1);
+                label.innerHTML = custom.name1 +":  " ;
+                let newinput = document.createElement('input');
+                newinput.setAttribute('type', 'file');
+                newinput.setAttribute('name', custom.name1);
+                newinput.setAttribute('data-name', custom.name1);
+                let br = document.createElement('br');
+                list_append.appendChild(label);
+                list_append.appendChild(newinput);
+                list_append.appendChild(br);
+            }
+        });
+        let label = document.createElement('label');
+        label.setAttribute('for', 'tolerance');
+        label.innerHTML = 'Tolerance:  ';
+        list_append.appendChild(label);
+        let newinput = document.createElement('input');
+        newinput.setAttribute('type', 'number');
+        newinput.setAttribute('name', 'tolerance');
+        newinput.setAttribute('value', tolerance);
+        newinput.setAttribute('style', 'width: 50px;');
+        newinput.setAttribute('step', '.01');
+        list_append.appendChild(newinput);
+        upload_image_form.replaceChildren(list_append);
+        $('#uploadDesign').modal('show');
+    });    
+</script>
+
+
+
+{% endblock %}

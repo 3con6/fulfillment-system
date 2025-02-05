@@ -1,0 +1,70 @@
+{% extends "base.html" %} {% block content%}
+<link rel="stylesheet" href="{{ url_for('auth_static',path='libs/dropzone/dropzone.css') }}" />
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Export</h4>
+    <!-- Hoverable Table rows -->
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="container-xxl">
+                <div class="col-12">
+                    <div class="mb-4">
+                        <div class="row">
+                            <div class="col card-header">
+                                <h5>Export data</h5>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="col-md-12 text-center loading_spinner" style="display: none;">
+                                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <i>
+                                <div id="api-response" class="mb-3" style="display: none;"></div>
+                            </i>
+
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="date-range-picker-3">Date Range</label>
+                                        <input type="text" class="form-control" name="date-range"
+                                            id="date-range-picker-3" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="team" class="form-label">Team </label>
+                                        <select class="form-select" id="team" name="team">
+                                            <option value=""></option>
+                                            <option value="all">All</option>
+                                            {% for team in data.teams %}
+                                            <option value="{{ team.name }}">{{ team.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="type" class="form-label">Type</label>
+                                        <select class="form-select" id="type" name="type">
+                                            <option value=""></option>
+                                            <option value="finance">Finance</option>
+                                            <option value="designer">Designer</option>
+                                            <option value="design_checker">Design checker</option>
+                                            <option value="tracking">Tracking</option>
+                                            <option value="shipping">Shipping</option>
+                                            <option value="thuy_cost">Thuỷ cost</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="export" class="btn btn-primary mt-3">Download</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('auth_static',path='js/export_data.js') }}" defer></script>
+{% endblock %}

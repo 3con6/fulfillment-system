@@ -1,0 +1,55 @@
+{% extends "base.html" %} 
+{% block content%}
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
+        <form action="./edit_group" method="POST">
+            <div class="row">
+                <div class="col-xl-6">
+                    <input type="hidden" name="_id" value="{{data['group_edit']['_id']}}">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">Edit Group</h5>
+                            <small class="text-muted float-end">Default label</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="basic-default-name">Name</label>
+                                <div class="col-sm-10">
+                                <input type="text" class="form-control" id="basic-default-name" name="group_name" value="{{data['group_edit']['group_name']}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <h5 class="card-header">Routes</h5>
+                        <!-- Checkboxes and Radios -->
+                        <div class="card-body">
+                            <div class="row gy-3">
+                                <div class="col-md">
+                                    {% for route in data['routes'] %}
+                                            {% if route in data['group_edit']['routes'] %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="routes" value="{{route}}" id="defaultCheck1" checked>
+                                                <label class="form-check-label" for="defaultCheck2"> {{route}} </label>
+                                            </div>
+                                            {% else %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="routes" value="{{route}}" id="defaultCheck1">
+                                                <label class="form-check-label" for="defaultCheck2"> {{route}} </label>
+                                            </div>
+                                            {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

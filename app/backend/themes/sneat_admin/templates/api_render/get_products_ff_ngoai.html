@@ -1,0 +1,8 @@
+<select
+    class="form-select form-select-sm form-select-color products-select mb-3">  
+    <option class="form-control custom-option"></option>
+    {% for product in context.products %}
+        <option class="form-control custom-option" value ="{{product.id}}">{{product.name}}</option>
+    {% endfor %}
+
+</select>

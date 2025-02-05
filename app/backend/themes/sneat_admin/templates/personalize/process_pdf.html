@@ -1,0 +1,512 @@
+{% extends "base.html" %} {% block content%}
+
+<link rel="stylesheet"
+    href="{{ url_for('auth_static',path='libs/datatable-fixedheader/fixedheader.bootstrap5.css') }}" />
+<link rel="stylesheet" href="{{ url_for('auth_static',path='css/demo.css') }}" />
+
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="row row-bordered g-0">
+                <div class="card-header row">
+                    <h5 class="card-title mb-0">PDF</h5>
+                </div>
+                <div class='card-body'>
+                    <!-- Buttons Row -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <button class="btn btn-primary" onclick="addTextbox(canvas)">Add Textbox</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-secondary" onclick="remove(canvas)">Remove Textbox</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-success" onclick="extract_all_element()">Save Data</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-secondary" id="upload-button">Upload Mockup</button>
+                        </div>
+                    </div>
+                    <!-- Input Number Row -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for='x'>x</label>
+                            <input type="number" id='x' style="width:50px">
+                        </div>
+                        <div class="col">
+                            <label for='y'>y</label>
+                            <input type="number" id='y' style="width:50px">
+                        </div>
+                        <div class="col">
+                            <label for='font'>font</label>
+                            <input type="number" id='font' style="width:50px">
+                        </div>
+                        <div class="col">
+                            <label for='width'>width</label>
+                            <input type="number" id='width' style="width:70px">
+                        </div>
+                        <div class="col">
+                            <label for='height'>height</label>
+                            <input type="number" id='height' style="width:70px">
+                        </div>
+                        <div class="col">
+                            <label for='tolerance'>tolerance</label>
+                            <input type="number" id='tolerance' value="1.0" style="width:50px">
+                        </div>
+                    </div>
+                    <!-- Canvas Element -->
+                    <div class="row">
+                        <div class="col">
+                            <div class="col-md-12 text-center loading_spinner">
+                                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <canvas id="canvas" width="1000" height="300" style="border:1px solid #000000">
+                            </canvas>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="uploadDesign" tabindex="-1" style="display: none;" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+                            <div class="modal-content p-3 p-md-5">
+                                <div class="modal-body">
+                                    <!-- Multi  -->
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <h5 class="card-header">Multiple</h5>
+                                            <div class="card-body">
+                                                <input type="hidden" class="upload-loop-index" value="" />
+                                                <form method="POST" class="dropzone needsclick" id="dropzone-multi">
+                                                    <!-- Hidden input fields for order id and product -->
+
+                                                    <div class="upload-image-form">
+                                                        <div class="dz-message needsclick">
+                                                            Drop files here or click to upload
+                                                        </div>
+                                                        <div class="fallback">
+                                                            <input name="file" type="file"
+                                                                accept="image/*, application/pdf, application/illustrator" />
+                                                        </div>
+                                                        <!-- submit btn -->
+                                                        <div class="text-center mt-3">
+                                                            <button type="button" class="btn btn-primary"
+                                                                id="uploadBtn">Upload</button>
+                                                            <button type="button" class="btn btn-outline-secondary"
+                                                                data-bs-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Multi  -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.0/fabric.min.js">
+</script>
+<script src="{{ url_for('auth_static',path='libs/dropzone/dropzone.js') }}"></script>
+
+<script>
+    var textBoxes = [];
+    var selected_id = ''
+    var input_x = document.getElementById('x');
+    var input_y = document.getElementById('y');
+    var input_font = document.getElementById('font');
+    function addTextbox(canvas) {
+        const currentDate = new Date();
+        var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+        var random = Math.floor(Math.random() * 9);
+        var uniqueId = currentDate.getTime().toString() + alphabet[random];
+        var textBox = new fabric.Textbox('Enter text...', {
+            fontSize: 16,
+            editable: true,
+            id: uniqueId
+
+        });
+        canvas.add(textBox);
+        canvas.centerObjectH(textBox);
+        canvas.setActiveObject(textBox);
+        input_x.value = textBox.left;
+        input_y.value = textBox.top;
+        input_font.value = textBox.fontSize;
+        textBoxes.push(textBox);
+    }
+    function remove(canvas) {
+        var targetE = canvas.getActiveObject();
+        canvas.remove(targetE);
+        canvas.renderAll();
+        selected_id = '';
+    }
+    $('.loading_spinner').show();
+    // Initiate a Canvas instance 
+    var canvas = new fabric.Canvas("canvas");
+    // current url
+    var url = new URL(window.location.href);
+
+    // get the id of the current url
+    var id = url.searchParams.get("mongo_id");
+    console.log(id);
+    var width_canvas = 0;
+    var height_canvas = 0;
+    $.ajax({
+        url: 'https://personalize-api.nambe.net/api/pdf_draft?mongo_id=' + id, // Update this URL as needed
+        method: 'GET',
+        success: function (data) {
+            // Assuming data is an array of image binary data 
+            try{
+                var images = data.result;
+            images.forEach(function (image) {
+                var width_ = parseInt(image['width']);
+                var height_ = parseInt(image['height']);
+                width_canvas += width_;
+                height_canvas += height_;
+                
+            });
+            width_canvas = width_canvas * 1.5 + 1000;
+            height_canvas = height_canvas ;
+            const scale = 1000 / width_canvas;
+            canvas.setHeight(height_canvas * scale);
+            images.forEach(function (image) {
+                console.log(image);
+                let imageSrc = image['file']
+                fabric.util.loadImage(imageSrc, function (img) {
+                    console.log(img.width);
+                    var legimg = new fabric.Image(img, {
+                        left: 30,
+                        top: 30,
+                        scaleX: scale,
+                        scaleY: scale,
+
+                    });
+                    legimg.toObject = function () {
+                        return { name: image['name'], x: this.left, y: this.top, scale: scale, type: 'image' };
+                    };
+                    legimg.lockUniScaling = true
+                    canvas.add(legimg);
+                });
+
+            });
+            $('.loading_spinner').hide();
+            $('#width').val(width_canvas);
+            $('#height').val(height_canvas);
+            canvas.renderAll();
+            }catch(error){
+                alert('Error'); 
+                $('.loading_spinner').hide();
+                console.error('Error:', error);
+            }    
+            
+        },
+        error: function (xhr, status, error) {
+            $('.loading_spinner').hide();
+            alert('Error'); // Update this URL as needed
+            console.error('Error:', error);
+        }
+    });
+    $('#width').on('change',function (){
+        let width = $('#width').val();
+        let height  = $('#height').val();
+        let newRatio = width / height;
+        let canvaswidth = canvas.height * newRatio;
+        canvas.setWidth(canvaswidth);
+        canvas.renderAll();
+    })
+    $('#height').on('change',function (){
+        let width = $('#width').val();
+        let height  = $('#height').val();
+        let newRatio = width / height;
+        let canvasHeight = 1000 / newRatio;
+        canvas.setHeight(canvasHeight);
+        canvas.renderAll();
+    })
+    const previewTemplate = `<div class="dz-preview dz-file-preview">
+        <div class="dz-details">
+            <div class="dz-thumbnail">
+                <img data-dz-thumbnail>
+                <span class="dz-nopreview">No preview</span>
+                <div class="dz-success-mark"></div>
+                <div class="dz-error-mark"></div>
+                <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                <div class="progress">
+                <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-dz-uploadprogress></div>
+                </div>
+            </div>
+            <div class="dz-filename" data-dz-name></div>
+            <div class="dz-size" data-dz-size></div>
+            </div>
+        </div>`;
+
+    function handleFormSubmit(files) {
+        const file = files[0];
+        if (!file) return;
+
+        // Check if the uploaded file is an image
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function () {
+                    // Create a Fabric.js image object
+                    img_scale = 1000 / img.width;
+                    const scale = 1000 / width_canvas;
+                    console.log(img.width);
+                    const fabricImage = new fabric.Image(img, {
+                        left: 0,
+                        top: 0,
+                        scaleX: scale * img_scale,
+                        scaleY: scale * img_scale,
+                    });
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const apiEndpoint = '/api/upload_gen_img';
+                    fetch(apiEndpoint, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            let path = data.link_folder
+                            fabricImage.toObject = function () {
+                                return { name: 'mockup', x: this.left, y: this.top, scale: scale, type: 'img_newgen', 'path': path, 'width': fabricImage.width * img_scale, 'height': fabricImage.height * img_scale };
+                            };
+                            fabricImage.lockUniScaling = true
+                            canvas.add(fabricImage);
+                            // Clear the canvas and add the new image
+
+                            $('#uploadDesign').modal('hide');
+                            // Render canvas
+                            canvas.renderAll();
+                        }).catch((error) => {
+                            alert('Error:',error);
+                            console.error('Error:', error);
+                        })
+
+
+                };
+            };
+            reader.readAsDataURL(file);
+
+
+
+        } else {
+            alert('Please select an image file.');
+        }
+    }
+
+    const dropzoneMulti = document.querySelector('#dropzone-multi');
+    if (dropzoneMulti) {
+        const myDropzoneMulti = new Dropzone(dropzoneMulti, {
+            url: '/dummy-url', // Set a dummy URL to prevent Dropzone from handling the upload
+            previewTemplate: previewTemplate,
+            parallelUploads: 1,
+            maxFilesize: 70,
+            addRemoveLinks: true
+        });
+
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.addEventListener('click', function () {
+            const files = myDropzoneMulti.files;
+            if (files.length > 0) {
+                handleFormSubmit(files);
+            } else {
+                console.log('No files selected.');
+            }
+        });
+    };
+    document.getElementById('upload-button').addEventListener('click', function () {
+        // Trigger file input
+        $('#uploadDesign').modal('show');
+    });
+
+
+    canvas.on('mouse:down', (options) => {
+        if (options.target) {
+            input_x.value = options.target.left;
+            input_y.value = options.target.top;
+            // check if the selected object is a textbox
+            if (options.target.type == 'textbox') {
+                // get the font size of the selected textbox
+                input_font.value = options.target.fontSize;
+            } else {
+                input_font.value = '';
+            }
+        } else {
+            canvas.discardActiveObject();
+            input_x.value = '';
+            input_y.value = '';
+            input_font.value = '';
+        }
+
+
+    });
+    canvas.on('object:scaling', function (event) {
+        if (event.target) {
+            input_font.value = (event.target.fontSize * event.target.scaleX).toFixed(0);
+        }
+    });
+
+    canvas.on('object:modified', function (event) {
+        if (event.target) {
+            event.target.fontSize *= event.target.scaleX;
+            event.target.fontSize = event.target.fontSize.toFixed(0);
+            if (event.target.type == 'textbox') {
+                event.target.scaleX = 1;
+                event.target.scaleY = 1;
+                event.target._clearCache();
+            }
+
+            input_font.value = event.target.fontSize;
+        }
+    });
+    // add change event listener to the input font box
+    input_font.addEventListener('change', (e) => {
+        // get the selected textbox
+        var targetE = canvas.getActiveObject();
+        // set the font size of the selected textbox
+        if (targetE.type == 'textbox') {
+            targetE.set('fontSize', parseFloat(e.target.value));
+            canvas.renderAll();
+        } else {
+            input_font.value = '';
+            canvas.discardActiveObject();
+        }
+        // render the canvas
+    });
+    // add change event listener to the input x box
+    input_x.addEventListener('change', (e) => {
+        // get the selected textbox
+        var targetE = canvas.getActiveObject();
+        if (targetE) {
+            if (targetE.type == 'textbox') {
+                canvas.centerObjectH(targetE);
+            }
+            // set the x position of the selected textbox
+
+            targetE.set('left', parseFloat(e.target.value));
+            // render the canvas
+            canvas.renderAll();
+        } else {
+            input_x.value = '';
+            canvas.discardActiveObject();
+        }
+    });
+    // add change event listener to the input y box
+    input_y.addEventListener('change', (e) => {
+        // get the selected textbox
+        var targetE = canvas.getActiveObject();
+        if (targetE) {
+            if (targetE.type == 'textbox') {
+                canvas.centerObjectV(targetE);
+            }
+            targetE.set('top', parseFloat(e.target.value));
+            // render the canvas
+            canvas.renderAll();
+        } else {
+            input_y.value = '';
+            canvas.discardActiveObject();
+        }
+        // set the y position of the selected textbox
+
+    });
+    canvas.on('object:moving', (options) => {
+        obj = options.target;
+        if (obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width) {
+            return;
+        }
+        obj.setCoords();
+        // top-left  corner
+        if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
+            obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
+            obj.left = Math.max(obj.left, obj.left - obj.getBoundingRect().left);
+
+        }
+        // bot-right corner
+        if (obj.getBoundingRect().top + obj.getBoundingRect().height > obj.canvas.height || obj.getBoundingRect().left + obj.getBoundingRect().width > obj.canvas.width) {
+            obj.top = Math.min(obj.top, obj.canvas.height - obj.getBoundingRect().height + obj.top - obj.getBoundingRect().top);
+            obj.left = Math.min(obj.left, obj.canvas.width - obj.getBoundingRect().width + obj.left - obj.getBoundingRect().left);
+        }
+        input_x.value = parseFloat(obj.left.toFixed(0));
+        input_y.value = parseFloat(obj.top.toFixed(0));
+
+    });
+    function hideOnClickOutside(element) {
+        const outsideClickListener = event => {
+            if (!element.contains(event.target) && isVisible(element)) { // or use: event.target.closest(selector) === null
+                element.style.display = 'none';
+                removeClickListener();
+            }
+        }
+
+        const removeClickListener = () => {
+            document.removeEventListener('click', outsideClickListener);
+        }
+
+        document.addEventListener('click', outsideClickListener);
+    }
+
+    function extract_all_element() {
+        var id = new URL(window.location.href).searchParams.get("mongo_id");
+        var objects = canvas.getObjects();
+        var data = [];
+        var scale = 1;
+        for (var i = 0; i < objects.length; i++) {
+            var data_oject = objects[i].toObject();
+            if (data_oject['type'] == 'image') {
+                scale = parseFloat(data_oject['scale']);
+                break;
+            }
+        }
+        console.log(scale);
+        objects.forEach(function (object) {
+            var data_oject = object.toObject();
+            data_oject['x'] = parseInt(object.left) / scale;
+            data_oject['y'] = parseInt(object.top) / scale;
+
+            data.push(data_oject);
+        });
+
+        var result = {
+            'type': 'nornal',
+            'pdf': {
+                'elements': data,
+                'width': $('#width').val(),
+                'height': $('#height').val(),
+                'tolerance': $('#tolerance').val()
+            },
+            'psd_mongo_id': id,
+
+        }
+        $.ajax({
+            url: '/api/save_pdf', // Update this URL as needed
+            method: 'POST',
+            data: JSON.stringify(result),
+            contentType: 'application/json',
+            success: function (data) {
+                // Assuming data is an array of image binary data    
+                alert(data.message);
+
+            },
+            error: function (xhr, status, error) {
+                alert('Error:', error); 
+                console.error('Error:', error);
+            }
+        });
+        console.log(result);
+    }
+
+
+
+</script>
+
+{% endblock %}
