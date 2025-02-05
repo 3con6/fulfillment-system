@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    image: registry.gitlab.com/nb-team/nb_kho:v0.5
+    container_name: nb_kho
+    command: gunicorn --worker-class=uvicorn.workers.UvicornWorker --log-level warning --worker-connections=1000 --workers=8 --bind 0.0.0.0:8000 app:app --timeout 600
+    # command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      VIRTUAL_HOST: fulfillments.nambe.net
+      VIRTUAL_PORT: 8000
+    ports:
+      - "5010:8000"
+    restart: always
+    volumes:
+      - ./app:/app
+    logging:
+        driver: "json-file"
+        options:
+            max-file: "5"
+            max-size: "10m"
+networks:
+  default:
+    external:
+      name: b_nginx_network

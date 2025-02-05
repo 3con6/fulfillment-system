@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  app:
+    build: . 
+    image: registry.gitlab.com/nb-team/nb_kho:v0.5
+    container_name: nb_kho_test
+    # command: python app.py
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    # command: uvicorn app:app --host 0.0.0.0 --port 8000
+    ports:
+      - "5004:8000"
+    restart: unless-stopped
+    volumes:
+      - ./app:/app
+    logging:
+        driver: "json-file"
+        options:
+            max-file: "5"
+            max-size: "10m"

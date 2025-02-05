@@ -1,0 +1,10 @@
+.git
+/.vscode/*
+/node_modules
+.gitignore
+/.history/
+venv*
+__pycache__
+.vscode
+test*.py
+.docker
