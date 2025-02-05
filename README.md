@@ -8,9 +8,6 @@
     <a href="">
         <img src="https://img.shields.io/badge/Licence-MIT-green.svg" alt="License">
     </a>
-    <a href="https://twitter.com/hukicamer">
-        <img src="https://img.shields.io/badge/contact-%40hukicamer-blue.svg?style=flat" alt="Twitter: @hukicamer" />
-    </a>
 </p>
 
 
